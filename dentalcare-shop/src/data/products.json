@@ -1,0 +1,142 @@
+[
+  {
+    "id": "p1",
+    "category": "whitening",
+    "price": 2400,
+    "image": "s4",
+    "stock": 25,
+    "active": true,
+    "name": {
+      "en": "Home Whitening Kit",
+      "ru": "Набор для домашнего отбеливания",
+      "ky": "Үйдө актоо топтому"
+    },
+    "description": {
+      "en": "Professional-grade gel and LED tray for a brighter smile at home.",
+      "ru": "Профессиональный гель и LED-капа для яркой улыбки дома.",
+      "ky": "Үйдө жарык жылмаюу үчүн профессионалдык гель жана LED капа."
+    }
+  },
+  {
+    "id": "p2",
+    "category": "care",
+    "price": 3900,
+    "image": "b4",
+    "stock": 25,
+    "active": true,
+    "name": {
+      "en": "Sonic Electric Toothbrush",
+      "ru": "Звуковая электрощётка",
+      "ky": "Үн электр щётка"
+    },
+    "description": {
+      "en": "Five cleaning modes, 30-day battery and a pressure sensor.",
+      "ru": "Пять режимов чистки, 30 дней работы и датчик давления.",
+      "ky": "Беш тазалоо режими, 30 күн иштейт, басым датчиги."
+    }
+  },
+  {
+    "id": "p3",
+    "category": "whitening",
+    "price": 380,
+    "image": "s6",
+    "stock": 25,
+    "active": true,
+    "name": {
+      "en": "Whitening Toothpaste",
+      "ru": "Отбеливающая зубная паста",
+      "ky": "Актоочу тиш пастасы"
+    },
+    "description": {
+      "en": "Fluoride paste that gently removes surface stains.",
+      "ru": "Фторсодержащая паста мягко удаляет налёт.",
+      "ky": "Фторлуу паста тактарды акырын тазалайт."
+    }
+  },
+  {
+    "id": "p4",
+    "category": "care",
+    "price": 3200,
+    "image": "b1",
+    "stock": 25,
+    "active": true,
+    "name": { "en": "Water Flosser", "ru": "Ирригатор", "ky": "Ирригатор" },
+    "description": {
+      "en": "Cordless irrigator that cleans between teeth and along the gumline.",
+      "ru": "Беспроводной ирригатор для очистки между зубами и вдоль дёсен.",
+      "ky": "Тиш арасын жана бекирди тазалоочу зымсыз ирригатор."
+    }
+  },
+  {
+    "id": "p5",
+    "category": "care",
+    "price": 1800,
+    "image": "s5",
+    "stock": 25,
+    "active": true,
+    "name": {
+      "en": "Night Guard Set",
+      "ru": "Капа для ночи",
+      "ky": "Түнкү капа"
+    },
+    "description": {
+      "en": "Custom-fit guard that protects teeth from grinding.",
+      "ru": "Капа для защиты зубов от бруксизма.",
+      "ky": "Тиш кычыраганынан коргоочу капа."
+    }
+  },
+  {
+    "id": "p6",
+    "category": "care",
+    "price": 450,
+    "image": "b3",
+    "stock": 25,
+    "active": true,
+    "name": {
+      "en": "Alcohol-free Mouthwash",
+      "ru": "Ополаскиватель без спирта",
+      "ky": "Спирттизсиз ополаскыч"
+    },
+    "description": {
+      "en": "Fresh breath and daily protection without irritation.",
+      "ru": "Свежее дыхание и ежедневная защита без раздражения.",
+      "ky": "Тазы дем жана күнүмдүк коргоо."
+    }
+  },
+  {
+    "id": "p7",
+    "category": "care",
+    "price": 260,
+    "image": "b2",
+    "stock": 25,
+    "active": true,
+    "name": {
+      "en": "Dental Floss Set",
+      "ru": "Набор зубных нитей",
+      "ky": "Тиш жиптери топтому"
+    },
+    "description": {
+      "en": "Three waxed flosses for everyday interdental cleaning.",
+      "ru": "Три вощёные нити для ежедневной чистки.",
+      "ky": "Күнүмдүк тазалоо үчүн үч жип."
+    }
+  },
+  {
+    "id": "p8",
+    "category": "kids",
+    "price": 690,
+    "image": "s1",
+    "stock": 25,
+    "active": true,
+    "name": {
+      "en": "Kids Brush Set",
+      "ru": "Детский набор щёток",
+      "ky": "Балдар щёткалары"
+    },
+    "description": {
+      "en": "Soft brushes and a timer to make brushing fun.",
+      "ru": "Мягкие щётки и таймер, чтобы чистка была весёлой.",
+      "ky": "Жумшак щёткалар жана таймер."
+    }
+  }
+]

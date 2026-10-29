@@ -1,0 +1,289 @@
+{
+  "services": [
+    {
+      "order": 0,
+      "image": "s1",
+      "name": {
+        "en": "General Dentistry",
+        "ru": "Общая стоматология",
+        "ky": "Жалпы стоматология"
+      },
+      "desc": {
+        "en": "Routine check-ups, cleanings and fillings for a healthy smile.",
+        "ru": "Профосмотры, чистка и пломбирование для здоровой улыбки.",
+        "ky": "Дени сак жылмаюу үчүн текшерүү, тазалоо жана пломба."
+      }
+    },
+    {
+      "order": 1,
+      "image": "s2",
+      "name": {
+        "en": "Cosmetic Dentistry",
+        "ru": "Эстетическая стоматология",
+        "ky": "Эстетикалык стоматология"
+      },
+      "desc": {
+        "en": "Veneers and smile design to enhance your natural look.",
+        "ru": "Виниры и дизайн улыбки для естественной красоты.",
+        "ky": "Винирлер жана жылмаюу дизайны."
+      }
+    },
+    {
+      "order": 2,
+      "image": "s3",
+      "name": {
+        "en": "Dental Implants",
+        "ru": "Имплантация",
+        "ky": "Имплантация"
+      },
+      "desc": {
+        "en": "Permanent, natural-looking replacement for missing teeth.",
+        "ru": "Постоянная естественная замена утраченных зубов.",
+        "ky": "Жоголгон тиштердин табигый ордун толтуруу."
+      }
+    },
+    {
+      "order": 3,
+      "image": "s4",
+      "name": {
+        "en": "Teeth Whitening",
+        "ru": "Отбеливание зубов",
+        "ky": "Тиштерди актоо"
+      },
+      "desc": {
+        "en": "Professional whitening for a brighter smile in one visit.",
+        "ru": "Профессиональное отбеливание за один визит.",
+        "ky": "Бир визитте профессионалдык актоо."
+      }
+    },
+    {
+      "order": 4,
+      "image": "s5",
+      "name": { "en": "Orthodontics", "ru": "Ортодонтия", "ky": "Ортодонтия" },
+      "desc": {
+        "en": "Braces and clear aligners to straighten your teeth.",
+        "ru": "Брекеты и элайнеры для ровных зубов.",
+        "ky": "Тиштерди түздөө үчүн брекет жана элайнер."
+      }
+    },
+    {
+      "order": 5,
+      "image": "s6",
+      "name": {
+        "en": "Preventive Care",
+        "ru": "Профилактика",
+        "ky": "Профилактика"
+      },
+      "desc": {
+        "en": "Cleanings, fluoride and guidance to keep problems away.",
+        "ru": "Чистка, фторирование и советы для профилактики.",
+        "ky": "Тазалоо, фторлоо жана профилактикалык кеңештер."
+      }
+    }
+  ],
+  "steps": [
+    {
+      "order": 0,
+      "title": {
+        "en": "Initial Consultation",
+        "ru": "Первичная консультация",
+        "ky": "Баштапкы кеңеш"
+      },
+      "text": {
+        "en": "Discuss your needs and health history.",
+        "ru": "Обсудим ваши запросы и историю здоровья.",
+        "ky": "Муктаждыктарыңызды талкуулайбыз."
+      }
+    },
+    {
+      "order": 1,
+      "title": {
+        "en": "Comprehensive Exam",
+        "ru": "Полное обследование",
+        "ky": "Толук текшерүү"
+      },
+      "text": {
+        "en": "Digital imaging and detailed assessment.",
+        "ru": "Цифровые снимки и детальная оценка.",
+        "ky": "Санарип сүрөттөр жана баалоо."
+      }
+    },
+    {
+      "order": 2,
+      "title": {
+        "en": "Treatment Plan",
+        "ru": "План лечения",
+        "ky": "Дарылоо планы"
+      },
+      "text": {
+        "en": "A plan tailored to your goals and budget.",
+        "ru": "План под ваши цели и бюджет.",
+        "ky": "Максатыңызга жана бюджетиңизге план."
+      }
+    },
+    {
+      "order": 3,
+      "title": {
+        "en": "Follow-up Care",
+        "ru": "Поддержка после лечения",
+        "ky": "Дарылоодон кийинки көзөмөл"
+      },
+      "text": {
+        "en": "Long-term support for a lasting smile.",
+        "ru": "Долгосрочная поддержка результата.",
+        "ky": "Узак мөөнөттүү колдоо."
+      }
+    }
+  ],
+  "doctors": [
+    {
+      "order": 0,
+      "image": "hero1",
+      "name": "Dr. Aigerim Sadykova",
+      "role": {
+        "en": "Lead Dentist · 12 yrs",
+        "ru": "Главный врач · 12 лет",
+        "ky": "Башкы дарыгер · 12 жыл"
+      },
+      "bio": {
+        "en": "Specialises in cosmetic dentistry and smile design. Member of the national dental association.",
+        "ru": "Специализируется на эстетической стоматологии и дизайне улыбки.",
+        "ky": "Эстетикалык стоматологияга адистешкен."
+      }
+    },
+    {
+      "order": 1,
+      "image": "hero2",
+      "name": "Dr. Bakyt Omurov",
+      "role": {
+        "en": "Implantologist · 9 yrs",
+        "ru": "Имплантолог · 9 лет",
+        "ky": "Имплантолог · 9 жыл"
+      },
+      "bio": {
+        "en": "Performs guided implant surgery and complex restorations.",
+        "ru": "Выполняет имплантацию и сложное протезирование.",
+        "ky": "Имплантация жана протездөө боюнча адис."
+      }
+    },
+    {
+      "order": 2,
+      "image": "hero3",
+      "name": "Dr. Elena Petrova",
+      "role": {
+        "en": "Orthodontist · 8 yrs",
+        "ru": "Ортодонт · 8 лет",
+        "ky": "Ортодонт · 8 жыл"
+      },
+      "bio": {
+        "en": "Braces and clear aligners for children and adults.",
+        "ru": "Брекеты и элайнеры для детей и взрослых.",
+        "ky": "Балдар жана чоңдор үчүн брекет жана элайнер."
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "order": 0,
+      "initial": "A",
+      "name": "Aigerim S.",
+      "rating": 5,
+      "text": {
+        "en": "The staff is amazing and the care I received was top-notch. My smile has never looked better!",
+        "ru": "Персонал потрясающий, уход на высшем уровне. Моя улыбка никогда не выглядела лучше!",
+        "ky": "Кызматкерлер сонун, тейлөө жогорку деңгээлде. Жылмаюум мынчалык кооз болгон эмес!"
+      }
+    },
+    {
+      "order": 1,
+      "initial": "E",
+      "name": "Emil B.",
+      "rating": 5,
+      "text": {
+        "en": "Professional, friendly and very attentive. I highly recommend this clinic to everyone!",
+        "ru": "Профессионально, дружелюбно и внимательно. Рекомендую всем!",
+        "ky": "Кесипкөй, достук жана көңүл буруучу. Баарына сунуштайм!"
+      }
+    },
+    {
+      "order": 2,
+      "initial": "A",
+      "name": "Aisuluu T.",
+      "rating": 5,
+      "text": {
+        "en": "Modern technology, clean clinic and kind doctors. I'm so happy with my results.",
+        "ru": "Современные технологии, чистота и добрые врачи. Очень довольна результатом.",
+        "ky": "Заманбап технология, таза клиника жана боорукер дарыгерлер. Абдан ыраазымын."
+      }
+    },
+    {
+      "order": 3,
+      "initial": "N",
+      "name": "Nurlan K.",
+      "rating": 5,
+      "text": {
+        "en": "No pain and no waiting. My implant was done exactly as planned.",
+        "ru": "Без боли и очередей. Имплант поставили точно по плану.",
+        "ky": "Ооруксуз жана кезексиз. Имплант план боюнча коюлду."
+      }
+    }
+  ],
+  "posts": [
+    {
+      "order": 0,
+      "image": "b1",
+      "title": {
+        "en": "How to Maintain a Healthy Smile",
+        "ru": "Как сохранить здоровую улыбку",
+        "ky": "Дени сак жылмаюуну кантип сактоо"
+      },
+      "text": {
+        "en": "Brush twice a day for two minutes with fluoride toothpaste, and clean between teeth daily.",
+        "ru": "Чистите зубы дважды в день по две минуты фторсодержащей пастой и ежедневно используйте флосс.",
+        "ky": "Күнүнө эки жолу эки мүнөттөн фторлуу паста менен тазалап, күн сайын жип колдонуңуз."
+      }
+    },
+    {
+      "order": 1,
+      "image": "b2",
+      "title": {
+        "en": "Why Regular Checkups Matter",
+        "ru": "Почему важны регулярные осмотры",
+        "ky": "Үзгүлтүксүз текшерүү эмне үчүн маанилүү"
+      },
+      "text": {
+        "en": "A check-up every six months catches cavities and gum disease early, when treatment is simple.",
+        "ru": "Осмотр раз в полгода выявляет кариес и болезни дёсен на ранней стадии.",
+        "ky": "Жарым жылда бир текшерүү оорунун алгачкы стадиясын аныктайт."
+      }
+    },
+    {
+      "order": 2,
+      "image": "b3",
+      "title": {
+        "en": "Understanding Teeth Whitening",
+        "ru": "Всё об отбеливании зубов",
+        "ky": "Тиш актоо жөнүндө баары"
+      },
+      "text": {
+        "en": "Professional whitening is safe when supervised by a dentist. Avoid dark drinks for 48 hours afterwards.",
+        "ru": "Профессиональное отбеливание безопасно под контролем врача. 48 часов избегайте тёмных напитков.",
+        "ky": "Дарыгердин көзөмөлүндө актоо коопсуз. 48 саат кара суусундуктардан сактаныңыз."
+      }
+    },
+    {
+      "order": 3,
+      "image": "b4",
+      "title": {
+        "en": "5 Habits for Better Oral Health",
+        "ru": "5 привычек для здоровья полости рта",
+        "ky": "Оозду сактоочу 5 адат"
+      },
+      "text": {
+        "en": "Limit sugary snacks, drink water, replace your brush every 3 months, don't smoke, visit your dentist.",
+        "ru": "Меньше сладкого, больше воды, смена щётки каждые 3 месяца, отказ от курения, визиты к врачу.",
+        "ky": "Таттуу азыкты азайтып, суу ичип, щёткаңызды 3 айда алмаштырып, тартпаңыз."
+      }
+    }
+  ]
+}
