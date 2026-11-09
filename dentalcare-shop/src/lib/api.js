@@ -1,19 +1,18 @@
 export async function post(path, body, token) {
-  let r;
-  try {
-    r = await fetch(path, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: "Bearer " + token } : {}),
-      },
-      body: JSON.stringify(body),
-    });
-  } catch {
-    throw new Error("net");
-  }
-  const d = await r.json().catch(() => null);
-  if (!r.ok || !d)
-    throw new Error(r.status === 404 || !d ? "net" : d.error || "server");
-  return d;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+        const response = await fetch(path, {
+            method: 'POST', signal: controller.signal,
+            headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+            body: JSON.stringify(body),
+        });
+        const data = await response.json().catch(error => { if (controller.signal.aborted) throw error; return null; });
+        if (!response.ok || !data) throw new Error(response.status === 404 || !data ? 'net' : data.error || 'server');
+        return data;
+    } catch (error) {
+        if (controller.signal.aborted) throw new Error('timeout');
+        if (error instanceof TypeError) throw new Error('net');
+        throw error;
+    } finally { clearTimeout(timer); }
 }

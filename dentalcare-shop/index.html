@@ -3,8 +3,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <meta name="theme-color" content="#f7f9f7">
+  <script>
+    var savedTheme;
+    try { savedTheme = localStorage.getItem('theme'); } catch (_) {}
+    var initialTheme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.dataset.theme = initialTheme;
+    document.documentElement.style.colorScheme = initialTheme;
+  </script>
   <title>DentalCare — Dental clinic &amp; care shop</title>
 
   <meta
@@ -12,13 +21,6 @@
     content="DentalCare: dental clinic, online booking and a shop of dental care products. EN / RU / KY."
   >
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  >
 </head>
 
 <body>

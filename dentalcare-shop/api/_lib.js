@@ -1,12 +1,16 @@
+import { supabaseSettings } from '../src/lib/config.js';
 import { createClient } from "@supabase/supabase-js";
 const env = (k) => process.env[k];
-export const admin = () =>
-  createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), {
-    auth: { persistSession: false },
-  });
+const settings = () => supabaseSettings(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'));
+export const configured = () => Boolean(settings());
+export const admin = () => {
+  const config = settings();
+  if (!config) throw new Error('Supabase server configuration is missing or invalid');
+  return createClient(config.url, config.key, { auth: { persistSession: false } });
+};
 export async function userFrom(req) {
-  const t = (req.headers.authorization || "").slice(7);
-  if (!t) return null;
+  const t = /^Bearer\s+(.+)$/i.exec(req.headers.authorization || '')?.[1];
+  if (!t || !configured()) return null;
   const { data } = await admin().auth.getUser(t);
   return data?.user || null;
 }
@@ -17,36 +21,14 @@ export const esc = (s) =>
   );
 export const validPhone = (p) => /^\+?[\d\s()-]{7,18}$/.test(p);
 export const validEmail = (e) => /^\S+@\S+\.\S+$/.test(e);
-export async function telegram(text) {
-  if (!env("TELEGRAM_BOT_TOKEN") || !env("TELEGRAM_CHAT_ID"))
-    return { sent: false, reason: "not_configured" };
-  try {
-    const r = await fetch(
-      `https://api.telegram.org/bot${env("TELEGRAM_BOT_TOKEN")}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: env("TELEGRAM_CHAT_ID"),
-          text,
-          parse_mode: "HTML",
-        }),
-      },
-    );
-    const j = await r.json();
-    return j.ok
-      ? { sent: true }
-      : { sent: false, reason: j.description || "telegram_error" };
-  } catch (e) {
-    return { sent: false, reason: "network_error" };
-  }
-}
+export { telegram } from './_telegram.js';
 export async function email(subject, html) {
   if (!env("RESEND_API_KEY") || !env("ADMIN_EMAIL") || !env("FROM_EMAIL"))
     return { sent: false, reason: "not_configured" };
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
+      signal: AbortSignal.timeout(10000),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${env("RESEND_API_KEY")}`,

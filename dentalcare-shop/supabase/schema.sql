@@ -1,3 +1,4 @@
+begin;
 -- DentalCare shop: run this whole file in Supabase > SQL Editor
 create table if not exists public.profiles(id uuid primary key references auth.users on delete cascade, full_name text, phone text, role text not null default 'user' check (role in ('user','admin')), created_at timestamptz default now());
 create table if not exists public.products(id text primary key default gen_random_uuid()::text, category text default 'care', price numeric not null check (price>=0), image text, stock int default 0, active boolean default true, name jsonb not null, description jsonb, created_at timestamptz default now());
@@ -14,20 +15,32 @@ create trigger on_auth_user_created after insert on auth.users for each row exec
 alter table public.profiles enable row level security; alter table public.products enable row level security; alter table public.orders enable row level security; alter table public.bookings enable row level security; alter table public.reviews enable row level security;
 
 -- profiles: users read/update themselves but can NEVER change their own role
+drop policy if exists "profiles read" on public.profiles;
 create policy "profiles read" on public.profiles for select using (id=auth.uid() or public.is_admin());
+drop policy if exists "profiles update own" on public.profiles;
 create policy "profiles update own" on public.profiles for update using (id=auth.uid()) with check (id=auth.uid() and role=public.my_role());
+drop policy if exists "profiles admin update" on public.profiles;
 create policy "profiles admin update" on public.profiles for update using (public.is_admin());
 -- products: public read of active items, admin full control
+drop policy if exists "products read" on public.products;
 create policy "products read" on public.products for select using (active or public.is_admin());
+drop policy if exists "products admin" on public.products;
 create policy "products admin" on public.products for all using (public.is_admin()) with check (public.is_admin());
 -- orders / bookings: created ONLY by the backend (service role). Users read their own, admins read/update all.
+drop policy if exists "orders read" on public.orders;
 create policy "orders read" on public.orders for select using (user_id=auth.uid() or public.is_admin());
+drop policy if exists "orders admin update" on public.orders;
 create policy "orders admin update" on public.orders for update using (public.is_admin());
+drop policy if exists "bookings read" on public.bookings;
 create policy "bookings read" on public.bookings for select using (user_id=auth.uid() or public.is_admin());
+drop policy if exists "bookings admin update" on public.bookings;
 create policy "bookings admin update" on public.bookings for update using (public.is_admin());
 -- reviews: everyone reads, logged-in users insert their own, owner/admin delete
+drop policy if exists "reviews read" on public.reviews;
 create policy "reviews read" on public.reviews for select using (true);
+drop policy if exists "reviews insert" on public.reviews;
 create policy "reviews insert" on public.reviews for insert with check (auth.uid()=user_id);
+drop policy if exists "reviews delete" on public.reviews;
 create policy "reviews delete" on public.reviews for delete using (user_id=auth.uid() or public.is_admin());
 
 insert into public.products(id,category,price,image,stock,name,description) values
@@ -43,3 +56,5 @@ on conflict (id) do nothing;
 
 -- To make yourself admin (the ONLY way; do this in the SQL editor after you register):
 -- update public.profiles set role='admin' where id=(select id from auth.users where email='YOUR_EMAIL');
+
+commit;

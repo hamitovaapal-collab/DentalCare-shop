@@ -1,0 +1,13 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import handler from '../netlify/functions/api.mjs';
+const req=(path,method='GET',body,headers={})=>new Request('https://dentalcare-shop.netlify.app'+path,{method,headers:{'Content-Type':'application/json',...headers},...(body===undefined?{}:{body:typeof body==='string'?body:JSON.stringify(body)})});
+test('Netlify health uses the real handler and returns no secret values',async()=>{const r=await handler(req('/api/health'));assert.equal(r.status,200);const data=await r.json();assert.equal(data.ok,true);for(const value of Object.values(data.configuration))assert.equal(typeof value,'boolean');assert.equal(r.headers.get('Cache-Control'),'no-store');});
+test('HEAD health has no body',async()=>{const r=await handler(req('/api/health','HEAD'));assert.equal(r.status,200);assert.equal(await r.text(),'');});
+test('rewritten function paths and original API paths both work',async()=>{for(const path of ['/api/health','/.netlify/functions/api/health'])assert.equal((await handler(req(path))).status,200);});
+test('unknown API endpoints are JSON 404, including inherited object keys',async()=>{for(const path of ['/api/missing','/api/constructor','/api/__proto__']){const r=await handler(req(path));assert.equal(r.status,404);assert.deepEqual(await r.json(),{error:'not_found'});}});
+test('API methods are checked by the actual handlers',async()=>{for(const path of ['order','booking','telegram-webhook'])assert.equal((await handler(req('/api/'+path))).status,405);});
+test('anonymous checkout cannot write orders',async()=>{const r=await handler(req('/api/order','POST',{}));assert.equal(r.status,401);assert.deepEqual(await r.json(),{error:'auth'});});
+test('booking validates request data',async()=>{const r=await handler(req('/api/booking','POST',{}));assert.equal(r.status,400);assert.deepEqual(await r.json(),{error:'validation'});});
+test('malformed JSON and oversized bodies are rejected before handler calls',async()=>{assert.equal((await handler(req('/api/order','POST','{broken'))).status,400);const r=await handler(req('/api/order','POST',{note:'x'.repeat(103000)}));assert.equal(r.status,413);assert.deepEqual(await r.json(),{error:'payload_too_large'});});
+test('webhook has no unauthenticated public command endpoint',async()=>{const r=await handler(req('/api/telegram-webhook','POST',{update_id:1}));assert.ok([403,503].includes(r.status));});

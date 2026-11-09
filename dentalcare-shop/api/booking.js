@@ -1,5 +1,6 @@
 import {
   admin,
+  configured,
   userFrom,
   telegram,
   email,
@@ -18,24 +19,26 @@ export default async function handler(req, res) {
       service = String(b.service || "")
         .trim()
         .slice(0, 100),
-      time = String(b.time || "")
-        .trim()
-        .slice(0, 5),
+      time = String(b.time || "").trim(),
       message = String(b.message || "")
         .trim()
         .slice(0, 800),
       date = String(b.date || "");
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Bishkek' }).format(new Date());
+    const localTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bishkek', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
+    const parsedDate = new Date(`${date}T12:00:00Z`);
+    const realDate = !Number.isNaN(parsedDate.getTime()) && parsedDate.toISOString().slice(0, 10) === date;
     if (
       name.length < 2 ||
       !validPhone(phone) ||
       !validEmail(em) ||
       !service ||
       !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-      date < today ||
-      !/^\d{2}:\d{2}$/.test(time)
+      !realDate || date < today || parsedDate.getUTCDay() === 0 || (date === today && time <= localTime) ||
+      !/^(09|1[0-9]):00$/.test(time)
     )
       return res.status(400).json({ error: "validation" });
+    if (!configured()) return res.status(503).json({ error: 'not_configured' });
     const { data: o, error } = await admin()
       .from("bookings")
       .insert({
@@ -57,13 +60,14 @@ export default async function handler(req, res) {
       telegram(text),
       email(`New booking #${o.id.slice(0, 8)}`, html),
     ]);
-    await admin()
-      .from("bookings")
-      .update({ notified: { telegram: tg.sent, email: mail.sent } })
-      .eq("id", o.id);
+    try {
+      const { error: metadataError } = await admin().from('bookings')
+        .update({ notified: { telegram: tg.sent, email: mail.sent } }).eq('id', o.id);
+      if (metadataError) console.warn('Booking saved; notification metadata update failed');
+    } catch { console.warn('Booking saved; notification metadata update unavailable'); }
     res.json({ ok: true, id: o.id, notify: { telegram: tg, email: mail } });
   } catch (e) {
-    console.error("booking error", e);
+    console.error("booking request failed");
     res.status(500).json({ error: "server" });
   }
 }

@@ -1,0 +1,12 @@
+import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import { createApp } from '../server/app.js';
+let server, base;
+before(async()=>{server=createApp().listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));base=`http://127.0.0.1:${server.address().port}`;});
+after(async()=>{server?.closeAllConnections();await new Promise(resolve=>server.close(resolve));});
+test('health describes configuration without exposing values',async()=>{const r=await fetch(base+'/api/health');assert.equal(r.status,200);const body=await r.json();assert.equal(body.ok,true);for(const value of Object.values(body.configuration))assert.equal(typeof value,'boolean');});
+test('unsupported methods return JSON 405',async()=>{for(const path of ['order','booking','telegram-webhook']){const r=await fetch(base+'/api/'+path);assert.equal(r.status,405);assert.deepEqual(await r.json(),{error:'method'});}});
+test('unknown API routes return JSON 404',async()=>{const r=await fetch(base+'/api/missing');assert.equal(r.status,404);assert.deepEqual(await r.json(),{error:'not_found'});});
+test('malformed JSON returns a validation response',async()=>{const r=await fetch(base+'/api/booking',{method:'POST',headers:{'Content-Type':'application/json'},body:'{broken'});assert.equal(r.status,400);assert.deepEqual(await r.json(),{error:'validation'});});
+test('large bodies are rejected before reaching handlers',async()=>{const r=await fetch(base+'/api/booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'x'.repeat(110000)})});assert.equal(r.status,413);assert.deepEqual(await r.json(),{error:'payload_too_large'});});
+test('real handler validation runs through HTTP',async()=>{const r=await fetch(base+'/api/booking',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});assert.equal(r.status,400);assert.deepEqual(await r.json(),{error:'validation'});});

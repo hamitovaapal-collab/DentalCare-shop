@@ -1,0 +1,75 @@
+import {test,expect} from '@playwright/test';
+import {mockService} from './helpers/account.js';
+test('login, redirect, profile save, orders and logout with isolated service contract',async({page})=>{
+ await mockService(page);await page.goto('/login?redirect=/checkout');
+ await page.getByRole('button',{name:'Log in',exact:true}).click();await expect(page.locator('.bad-msg')).toBeVisible();
+ await page.locator('[name=email]').fill('test@example.com');await page.locator('[name=password]').fill('test-password');await page.getByRole('button',{name:'Log in',exact:true}).click();await expect(page).toHaveURL(/cart/);
+ await page.goto('/profile'); // fixture state resets on full navigation; authenticate in-page instead
+ await page.goto('/login');await page.locator('[name=email]').fill('test@example.com');await page.locator('[name=password]').fill('test-password');await page.getByRole('button',{name:'Log in',exact:true}).click();await expect(page).toHaveURL(/profile/);
+ await expect(page.locator('main input').first()).toHaveValue('Test Customer');await page.locator('main input').first().fill('Updated Name');await page.getByRole('button',{name:'Save',exact:true}).click();
+ expect(await page.evaluate(()=>window.fixture.writes.some(x=>x.table==='profiles'&&x.body.full_name==='Updated Name'))).toBe(true);
+ await page.getByRole('link',{name:'My orders',exact:true}).click();await expect(page.locator('.empty')).toContainText('No orders yet');
+ await page.locator('header a.ib[href="/profile"]').click();await page.getByRole('button',{name:'Log out',exact:true}).click();await expect(page).toHaveURL('http://localhost:5173/');
+});
+test('registration and password recovery do not report false success',async({page})=>{
+ await mockService(page);await page.goto('/register');await page.getByRole('button',{name:'Sign up',exact:true}).click();await expect(page.locator('.bad-msg')).toBeVisible();
+ await page.locator('[name=name]').fill('Test Customer');await page.locator('[name=email]').fill('test@example.com');await page.locator('[name=password]').fill('test-password');await page.getByRole('button',{name:'Sign up',exact:true}).click();await expect(page.locator('.ok')).toContainText('Check your email');
+ await page.goto('/forgot');await page.locator('[name=email]').fill('test@example.com');await page.evaluate(()=>window.fixture.failReset=true);await page.getByRole('button',{name:'Send reset link'}).click();await expect(page.locator('.bad-msg')).toBeVisible();await expect(page.locator('.ok')).toHaveCount(0);
+ await page.evaluate(()=>window.fixture.failReset=false);await page.getByRole('button',{name:'Send reset link'}).click();await expect(page.locator('.ok')).toBeVisible();
+});
+test('checkout success clears cart and keeps truthful notification results',async({page})=>{
+ await mockService(page,{loggedIn:true});await page.addInitScript(()=>localStorage.setItem('cart',JSON.stringify([{id:'p1',qty:2}])));
+ await page.route('**/api/order',route=>route.fulfill({json:{ok:true,id:'test-order',total:4500,items:[{id:'p1',qty:2,price:2250,name:'Test product'}],notify:{telegram:{sent:false,reason:'not_configured'},email:{sent:false,reason:'not_configured'}}}}));
+ await page.goto('/checkout');await page.locator('[name=address]').fill('Test address 123');await page.getByRole('button',{name:'Checkout',exact:true}).click();await expect(page.locator('h2')).toContainText('Order placed');await expect(page.locator('.notif')).toContainText('Telegram notification was NOT sent');expect(new URL(await page.getByRole('link',{name:'Send via WhatsApp'}).getAttribute('href')).searchParams.get('text')).toContain('4,500 KGS');expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('cart')))).toEqual([]);
+});
+test('reviews validate rating, save once and reset form',async({page})=>{
+ await mockService(page,{loggedIn:true});await page.goto('/reviews');await page.getByRole('button',{name:'Submit',exact:true}).click();await expect(page.locator('.bad-msg')).toContainText('Choose a rating');
+ for(let i=1;i<=5;i++)await page.getByRole('radio',{name:String(i),exact:true}).click();
+ await page.locator('.rvform textarea').fill('Test review text');await page.getByRole('button',{name:'Submit',exact:true}).click();await expect(page.locator('.rvform textarea')).toHaveValue('');expect(await page.evaluate(()=>window.fixture.writes.filter(x=>x.table==='reviews').length)).toBe(1);
+});
+test('admin tabs, product edit, cancel, save and delete are wired',async({page})=>{
+ await mockService(page,{loggedIn:true,admin:true});await page.goto('/admin');await expect(page.locator('.kpis')).toBeVisible();
+ for(const name of ['My orders','Booking','Users','Reviews','Shop']){await page.locator('main .chips').getByRole('button',{name,exact:true}).click();await expect(page.locator('.tbl')).toBeVisible();}
+ await page.getByRole('button',{name:'Edit',exact:true}).first().click();await expect(page.locator('[name=name_en]')).toHaveValue('Home Whitening Kit');await page.locator('form').getByRole('button',{name:'Back',exact:true}).click();await expect(page.locator('[name=name_en]')).toHaveValue('');
+ await page.locator('[name=name_en]').fill('Test product');await page.locator('[name=price]').fill('123');await page.getByRole('button',{name:'Save product'}).click();expect(await page.evaluate(()=>window.fixture.writes.some(x=>x.table==='products'&&x.op==='insert'))).toBe(true);expect(await page.evaluate(()=>window.fixture.writes.find(x=>x.table==='products'&&x.op==='insert').body.stock)).toBe(0);expect(await page.evaluate(()=>window.fixture.writes.find(x=>x.table==='products'&&x.op==='insert').body.image)).toBe('');
+ await page.getByRole('button',{name:'Delete',exact:true}).first().click();await page.getByRole('dialog').getByRole('button',{name:'Delete',exact:true}).click();expect(await page.evaluate(()=>window.fixture.writes.some(x=>x.table==='products'&&x.op==='delete'))).toBe(true);
+});
+test('missing profile no longer traps authenticated users in an infinite loader',async({page})=>{await mockService(page,{loggedIn:true,profileMissing:true});await page.goto('/profile');await expect(page.getByRole('alert')).toContainText('Unable to load data');await expect(page.getByRole('button',{name:'Retry',exact:true})).toBeVisible();});
+test('admin order and booking status controls and review deletion perform writes',async({page})=>{
+ await mockService(page,{loggedIn:true,admin:true});await page.goto('/admin');await expect(page.locator('.kpis')).toBeVisible();
+ await page.evaluate(()=>{const f=window.fixture;f.orders=[{id:'test-order',name:'Test Customer',email:'test@example.com',phone:'+996500000000',items:[{name:'Test product',qty:1}],total:123,status:'new'}];f.bookings=[{id:'test-booking',name:'Test Patient',email:'test@example.com',phone:'+996500000000',service:'Consultation',date:'2099-01-05',time:'10:00',status:'new'}];f.reviews=[{id:'test-review',author:'Test Customer',rating:5,comment:'Test review'}];});
+ for(const [label,table] of [['My orders','orders'],['Booking','bookings']]){
+  await page.locator('main .chips').getByRole('button',{name:label,exact:true}).click();
+  await page.locator('td select').selectOption('paid');expect(await page.evaluate(table=>window.fixture.writes.some(x=>x.table===table&&x.body.status==='paid'),table)).toBe(true);
+ }
+ await page.locator('main .chips').getByRole('button',{name:'Reviews',exact:true}).click();await page.getByRole('button',{name:'Delete',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Delete',exact:true}).click();expect(await page.evaluate(()=>window.fixture.writes.some(x=>x.table==='reviews'&&x.op==='delete'))).toBe(true);
+});
+test('booking confirms only a successful API response and displays notification failures',async({page})=>{
+ await mockService(page);await page.route('**/api/booking',route=>route.fulfill({json:{ok:true,id:'test-booking',notify:{telegram:{sent:false,reason:'not_configured'},email:{sent:false,reason:'not_configured'}}}}));
+ await page.goto('/booking?service=1');for(const [name,value] of Object.entries({name:'Test Patient',phone:'+996500000000',email:'test@example.com',date:'2099-01-05'}))await page.locator(`[name=${name}]`).fill(value);await page.locator('[name=time]').selectOption('10:00');await page.getByRole('button',{name:'Send Request',exact:true}).click();await expect(page.locator('h2')).toContainText('Your booking request was saved');await expect(page.locator('.notif')).toContainText('Telegram notification was NOT sent');
+});
+for(const theme of ['light','dark'])for(const width of [390,1440])test(`account, checkout and admin surfaces follow ${theme} at ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:900});await mockService(page,{loggedIn:true,admin:true,theme});
+ const surface=theme==='dark'?'rgb(24, 43, 39)':'rgb(255, 255, 255)';
+ const input=theme==='dark'?'rgb(16, 30, 28)':'rgb(247, 249, 247)';
+ await page.goto('/admin');await expect(page.locator('.kpis')).toBeVisible();await expect(page.locator('.kpi').first()).toHaveCSS('background-color',surface);
+ for(const name of ['My orders','Booking','Users','Reviews','Shop']){await page.locator('main .chips').getByRole('button',{name,exact:true}).click();await expect(page.locator('.tbl')).toHaveCSS('background-color',surface);}
+ await expect(page.locator('[name=name_en]')).toHaveCSS('background-color',input);
+ await page.goto('/profile');await expect(page.locator('form.auth')).toHaveCSS('background-color',surface);await expect(page.locator('form.auth input').first()).toHaveCSS('background-color',input);
+ await page.addInitScript(()=>localStorage.setItem('cart',JSON.stringify([{id:'p1',qty:1}])));await page.goto('/checkout');await expect(page.locator('[name=address]')).toBeVisible();await expect(page.locator('main form')).toHaveCSS('background-color',surface);await expect(page.locator('.sum')).toHaveCSS('background-color',surface);
+});
+test('admin cancellation leaves the product intact',async({page})=>{await mockService(page,{loggedIn:true,admin:true});await page.goto('/admin');await page.locator('main .chips').getByRole('button',{name:'Shop',exact:true}).click();await page.getByRole('button',{name:'Delete',exact:true}).first().click();await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).click();expect(await page.evaluate(()=>window.fixture.writes.filter(x=>x.op==='delete'))).toEqual([]);});
+test('reset without a recovery session offers a fresh link instead of submitting a broken request',async({page})=>{await mockService(page);await page.goto('/reset-password');await expect(page.locator('.note')).toContainText('missing or expired');await expect(page.locator('[name=password]')).toHaveCount(0);await page.getByRole('link',{name:'Send reset link',exact:true}).click();await expect(page).toHaveURL(/forgot/);});
+
+test('password reset works with an authenticated recovery session',async({page})=>{await mockService(page,{loggedIn:true});await page.goto('/reset-password');await page.locator('[name=password]').fill('test-password');await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page.locator('.ok')).toContainText('Password updated');});
+test('rapid duplicate form submissions create only one order request',async({page})=>{
+ await mockService(page,{loggedIn:true});await page.addInitScript(()=>localStorage.setItem('cart',JSON.stringify([{id:'p1',qty:1}])));let count=0;await page.route('**/api/order',async route=>{count++;await new Promise(r=>setTimeout(r,150));await route.fulfill({json:{ok:true,id:'test-order',total:2400,items:[{id:'p1',qty:1,price:2400}],notify:{telegram:{sent:false},email:{sent:false}}}});});await page.goto('/checkout');await page.locator('[name=address]').fill('Test address 123');await page.locator('main form').evaluate(form=>{form.requestSubmit();form.requestSubmit()});await expect(page.locator('h2')).toContainText('Order placed');expect(count).toBe(1);
+});
+test('rapid duplicate booking submissions send only one request',async({page})=>{
+ await mockService(page);let count=0;await page.route('**/api/booking',async route=>{count++;await new Promise(r=>setTimeout(r,150));await route.fulfill({json:{ok:true,id:'test-booking',notify:{telegram:{sent:false},email:{sent:false}}}});});await page.goto('/booking?service=1');for(const [name,value] of Object.entries({name:'Test Patient',phone:'+996500000000',email:'test@example.com',date:'2099-01-05'}))await page.locator(`[name=${name}]`).fill(value);await page.locator('[name=time]').selectOption('10:00');await page.locator('main form').evaluate(form=>{form.requestSubmit();form.requestSubmit()});await expect(page.locator('h2')).toContainText('Your booking request was saved');expect(count).toBe(1);
+});
+test('out-of-stock cart entries remain visible and removable',async({page})=>{await mockService(page,{stockZero:true});await page.addInitScript(()=>localStorage.setItem('cart',JSON.stringify([{id:'p1',qty:2}])));await page.goto('/cart');await expect(page.locator('.row')).toHaveCount(1);await expect(page.locator('.row')).toContainText('Out of stock');await expect(page.getByRole('button',{name:'Checkout',exact:true})).toBeDisabled();await page.getByRole('button',{name:'Remove',exact:true}).click();await expect(page.locator('.empty')).toContainText('Your cart is empty');});
+test('checkout keeps unavailable items that were not purchased',async({page})=>{await mockService(page,{loggedIn:true,stockZero:true});await page.addInitScript(()=>localStorage.setItem('cart',JSON.stringify([{id:'p1',qty:2},{id:'p2',qty:1}])));await page.route('**/api/order',r=>r.fulfill({json:{ok:true,id:'test-order',total:3900,items:[{id:'p2',qty:1,price:3900}],notify:{telegram:{sent:false},email:{sent:false}}}}));await page.goto('/checkout');await page.locator('[name=address]').fill('Test address');await page.getByRole('button',{name:'Checkout',exact:true}).click();await expect(page.locator('h2')).toContainText('Order placed');expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('cart')))).toEqual([{id:'p1',qty:2}]);});
+test('checkout retry reuses request ID and changed order gets a new ID',async({page})=>{
+ await mockService(page,{loggedIn:true});await page.addInitScript(()=>localStorage.setItem('cart',JSON.stringify([{id:'p1',qty:1}])));const requests=[];await page.route('**/api/order',async route=>{requests.push(route.request().postDataJSON());await route.fulfill({status:500,json:{error:'server'}});});await page.goto('/checkout');await page.locator('[name=address]').fill('Test address');const button=page.getByRole('button',{name:'Checkout',exact:true});for(let count=1;count<=2;count++){await button.click();await expect.poll(()=>requests.length).toBe(count);await expect(button).toBeEnabled();}expect(requests[0].request_id).toMatch(/^[0-9a-f-]{36}$/);expect(requests[1].request_id).toBe(requests[0].request_id);await page.locator('[name=address]').fill('Different address');await button.click();await expect.poll(()=>requests.length).toBe(3);expect(requests[2].request_id).not.toBe(requests[0].request_id);
+});

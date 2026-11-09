@@ -1,4 +1,43 @@
-{"name":"dentalcare-shop","private":true,"version":"1.0.0","type":"module",
-"scripts":{"dev":"concurrently -n web,api \"vite\" \"node --env-file=.env --watch server/dev.js\"","web":"vite","api":"node --env-file=.env server/dev.js","build":"vite build","preview":"vite preview"},
-"dependencies":{"@supabase/supabase-js":"^2.45.0","react":"^18.3.1","react-dom":"^18.3.1","react-router-dom":"^6.26.0"},
-"devDependencies":{"@vitejs/plugin-react":"^4.3.1","concurrently":"^8.2.2","express":"^4.19.2","vite":"^5.4.0"},"engines":{"node":">=20.6"}}
+{
+  "name": "dentalcare-shop",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n web,api \"vite\" \"node --use-env-proxy --env-file-if-exists=.env --watch server/dev.js\"",
+    "web": "vite",
+    "api": "node --use-env-proxy --env-file-if-exists=.env server/dev.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node tests/api.test.js",
+    "test:e2e": "playwright test",
+    "test:db": "node tests/checkout.test.js",
+    "start": "node --use-env-proxy --env-file-if-exists=.env server/start.js",
+    "test:http": "node tests/http.test.js",
+    "test:postgres": "node tests/postgres.test.js",
+    "test:production": "playwright test --config playwright.production.config.js",
+    "check:services": "node --use-env-proxy --env-file-if-exists=.env scripts/check-services.js",
+    "telegram:check": "node --use-env-proxy --env-file-if-exists=.env scripts/setup-telegram.js check",
+    "telegram:setup": "node --use-env-proxy --env-file-if-exists=.env scripts/setup-telegram.js webhook",
+    "telegram:test": "node --use-env-proxy --env-file-if-exists=.env scripts/setup-telegram.js test",
+    "test:telegram": "node tests/telegram.test.js",
+    "test:netlify": "node tests/netlify.test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14",
+    "@playwright/test": "^1.64.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.2.2",
+    "vite": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

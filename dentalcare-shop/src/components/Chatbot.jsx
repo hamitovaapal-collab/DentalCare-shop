@@ -1,3 +1,4 @@
+import Icon from './Icon';
 import { useEffect, useRef, useState } from 'react'; import { useNavigate } from 'react-router-dom'; import { useApp } from '../store'; import { waLink } from '../lib/wa';
 const I = [
   { k: ['book', 'appoint', 'visit', 'запис', 'приём', 'прием', 'визит', 'жазыл'], l: '/booking', a: ["To book a visit open the Booking page, choose a service, date and time, and send the form. We confirm by phone.", "Чтобы записаться, откройте страницу «Запись», выберите услугу, дату и время и отправьте форму. Мы подтвердим по телефону.", "Жазылуу үчүн «Жазылуу» барагын ачып, кызмат, күн жана убакытты тандап, форманы жөнөтүңүз. Биз телефон аркылуу ырастайбыз."] },
@@ -23,7 +24,7 @@ export default function Chatbot() {
   return <>{open && <div className="bot" role="dialog" aria-label={t('bot_t')}><div className="bot-h"><b>{t('bot_t')}</b><button onClick={() => setOpen(false)} aria-label="Close">×</button></div>
     <div className="bot-m">{msgs.map((m, i) => <div key={i} className={`bm ${m.me ? 'me' : ''}`}>{m.text}{m.link && <button className="lnk" onClick={() => { nav(m.link); setOpen(false) }}>{t('open_page')} →</button>}{m.wa && <a className="lnk" href={waLink(t('wa_hi'))} target="_blank" rel="noopener noreferrer">WhatsApp →</a>}</div>)}
       {busy && <div className="bm typing"><i /><i /><i /></div>}<div ref={end} /></div>
-    <div className="chips">{chips.map(([k, q]) => <button key={k} onClick={() => ask(t(k))}>{t(k)}</button>)}</div>
-    <div className="bot-f"><input value={v} onChange={e => setV(e.target.value)} onKeyDown={e => e.key === 'Enter' && ask(v)} placeholder={t('bot_ph')} aria-label={t('bot_ph')} /><button className="btn sm" onClick={() => ask(v)}>➤</button></div></div>}
-    <button className="fab" onClick={() => setOpen(!open)} aria-label={t('bot_open')}>{open ? '×' : '💬'}</button></>
+    <div className="chips">{chips.map(([k, q]) => <button key={k} disabled={busy} onClick={() => ask(t(k))}>{t(k)}</button>)}</div>
+    <div className="bot-f"><input value={v} onChange={e => setV(e.target.value)} onKeyDown={e => e.key === 'Enter' && ask(v)} placeholder={t('bot_ph')} aria-label={t('bot_ph')} /><button className="btn sm" disabled={busy || !v.trim()} aria-label={t('submit')} onClick={() => ask(v)}><Icon n="arrow" s={18}/></button></div></div>}
+    <button className="fab" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={t('bot_open')}><Icon n={open ? 'close' : 'chat'} s={25}/></button></>
 }

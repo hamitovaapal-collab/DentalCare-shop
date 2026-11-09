@@ -1,0 +1,25 @@
+# Paths are relative to this base, even when configuring from the repository root.
+[build]
+  base = "dentalcare-shop"
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+[functions]
+  node_bundler = "esbuild"
+
+# API routing must precede the SPA fallback. Never serve index.html as API JSON.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# Existing assets are served normally; deep links and reloads reach React Router.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
