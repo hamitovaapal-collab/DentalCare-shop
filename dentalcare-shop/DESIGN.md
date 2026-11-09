@@ -48,3 +48,11 @@ Use the shared `.card .im` 4:3 frame, independent of intrinsic image dimensions.
 ## Mobile navigation
 
 Below 820px keep the logo/menu row and a separate row of search, favorites, profile and cart actions. Keep 44px targets. Header ResizeObserver owns `--header-height`; use it for menu/scrim offsets, scroll padding and notifications instead of hardcoded heights. Review arrows remain available below the slide. On phones admin tables scroll within the named, keyboard-focusable region. Preserve two product columns and the shared image frame.
+
+## Original visual identity restored — 9 November 2026
+
+Use the original teal identity: light primary `#0a5865`, hover `#06414c`, white page surface, pale cyan secondary surfaces; night surfaces follow the original `#0b1b1f` / `#12292e` palette with readable light cyan actions. Keep existing semantic tokens and theme persistence.
+
+Home restores the original four `hero1..hero4` photographs, collage proportions, original clinic headline/copy, teal gradient, floating photos with staggered phases and animated background orbs. Retain the working shop/booking/service links, category navigation and all responsive fixes. Do not re-import conflicting legacy stylesheets. The hero has intentionally high-contrast white/outline actions on its teal background.
+
+Continuous motion uses transform only; scroll reveals and counters remain. Page entry is a short opacity transition. Under `prefers-reduced-motion: reduce`, photos remain visible and decorative continuous motion stops. `tests/original-design.spec.js` checks actual changing transforms, original assets, responsive width, navigation and reduced motion. Palette tests preserve contrast ≥4.5:1.
