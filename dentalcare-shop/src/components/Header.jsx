@@ -4,7 +4,7 @@ import { useApp } from '../store';
 import Icon from './Icon';
 import ThemeSwitch from './ThemeSwitch';
 export default function Header() {
-    const { t, lang, setLang, cartCount, favs, user, isAdmin } = useApp();
+    const { t, lang, setLang, cartCount, favs, user } = useApp();
     const header = useRef(null);
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -39,13 +39,14 @@ export default function Header() {
                     <Link className="ib" to="/favorites" aria-label={t('favs')}><Icon n="heart"/>{favs.length > 0 && <i>{favs.length}</i>}</Link>
                     <Link className="ib" to={user ? '/profile' : '/login'} aria-label={user ? t('mine') : t('login')}><Icon n="user"/></Link>
                     <Link className="ib cart-link" to="/cart" aria-label={t('cart')}><Icon n="cart"/>{cartCount > 0 && <i>{cartCount}</i>}<span>{t('cart')}</span></Link>
+                    <Link className="ib admin-shortcut" to="/admin" aria-label={t('adm')}><Icon n="shield" s={18}/><span>{t('adm')}</span></Link>
                 </div>
                 <button type="button" className="burger ib" aria-label={t('menu')} aria-controls="menu" aria-expanded={open} onClick={() => setOpen(v => !v)}><Icon n={open ? 'close' : 'menu'} s={23}/></button>
             </div>
             <div className="nav-divider"><div className="wrap nav-bottom">
                 <nav id="menu" className={open ? 'open' : ''} aria-label={t('navigation')}>
                     {links.map(([to, key]) => <NavLink key={to} to={to} end={to === '/'} className={({isActive}) => isActive ? 'act' : ''}>{t(key)}</NavLink>)}
-                    {isAdmin && <NavLink to="/admin">{t('adm')}</NavLink>}
+                    <NavLink to="/admin">{t('adm')}</NavLink>
                     <div className="m-extra"><Link to="/favorites">{t('favs')} ({favs.length})</Link><Link to={user ? '/profile' : '/login'}>{user ? t('mine') : t('login')}</Link></div>
                 </nav>
                 <div className="preferences"><div className="lang" role="group" aria-label={t('language')}>{['ky', 'ru', 'en'].map(l => <button type="button" key={l} aria-pressed={lang === l} className={lang === l ? 'on' : ''} onClick={() => setLang(l)}>{l === 'ky' ? 'KG' : l.toUpperCase()}</button>)}</div><ThemeSwitch/></div>

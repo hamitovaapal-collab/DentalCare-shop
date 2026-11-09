@@ -5,6 +5,7 @@ import path from 'node:path';
 import order from '../api/order.js';
 import booking from '../api/booking.js';
 import health from '../api/health.js';
+import publicConfig from '../api/public-config.js';
 import telegramWebhook from '../api/telegram-webhook.js';
 const buildDirectory = fileURLToPath(new URL('../dist/', import.meta.url));
 export function createApp({ serveFrontend = false } = {}) {
@@ -17,6 +18,7 @@ export function createApp({ serveFrontend = false } = {}) {
     // Configuration flags do not prove remote service readiness. No secret values
     // are returned and no external calls or writes are made by this endpoint.
     app.all('/api/health', health);
+    app.all('/api/public-config', (_req, res, next) => {res.setHeader('Cache-Control', 'no-store'); next();}, publicConfig);
     app.all('/api/telegram-webhook', telegramWebhook);
     app.all('/api/order', order);
     app.all('/api/booking', booking);

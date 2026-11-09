@@ -56,3 +56,7 @@ Use the original teal identity: light primary `#0a5865`, hover `#06414c`, white 
 Home restores the original four `hero1..hero4` photographs, collage proportions, original clinic headline/copy, teal gradient, floating photos with staggered phases and animated background orbs. Retain the working shop/booking/service links, category navigation and all responsive fixes. Do not re-import conflicting legacy stylesheets. The hero has intentionally high-contrast white/outline actions on its teal background.
 
 Continuous motion uses transform only; scroll reveals and counters remain. Page entry is a short opacity transition. Under `prefers-reduced-motion: reduce`, photos remain visible and decorative continuous motion stops. `tests/original-design.spec.js` checks actual changing transforms, original assets, responsive width, navigation and reduced motion. Palette tests preserve contrast ≥4.5:1.
+
+## Admin entry and configuration bootstrap
+
+Admin is a public navigation entry in the desktop header and a labeled mobile header shortcut, not a footer link. Its visibility does not grant any privileges. Auth and RLS still protect data. `initializeSupabase()` finishes before AppProvider mounts: use safe build variables or bounded same-origin public runtime configuration, otherwise preserve the storefront. No secret/server credential may enter the browser or static bundle.

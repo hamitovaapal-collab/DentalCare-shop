@@ -2,8 +2,9 @@
 import order from '../../api/order.js';
 import booking from '../../api/booking.js';
 import health from '../../api/health.js';
+import publicConfig from '../../api/public-config.js';
 import webhook from '../../api/telegram-webhook.js';
-const handlers = { order, booking, health, 'telegram-webhook': webhook };
+const handlers = { order, booking, health, 'public-config': publicConfig, 'telegram-webhook': webhook };
 const json = (data, status = 200, head = false) => new Response(head ? null : JSON.stringify(data), {
   status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });

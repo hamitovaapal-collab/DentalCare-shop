@@ -7,6 +7,7 @@ export async function mockService(page,{loggedIn=false,admin=false,profileMissin
  await page.route(/\/src\/lib\/supabase\.js(?:\?.*)?$/,route=>route.fulfill({contentType:'application/javascript',body:`
  const f=window.fixture; const user={id:'test-user',email:'test@example.com'}; let listener=()=>{};
  const session=()=>f.loggedIn?{user,access_token:'test-session'}:null;
+ export const initializeSupabase=async()=>supabase;
  export const supabase={auth:{
  getSession:async()=>({data:{session:session()}}),onAuthStateChange:cb=>{listener=cb;return {data:{subscription:{unsubscribe(){}}}}},
  signInWithPassword:async()=>{f.loggedIn=true;listener('SIGNED_IN',session());return {data:{session:session()}}},

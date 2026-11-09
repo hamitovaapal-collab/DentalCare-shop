@@ -1,5 +1,6 @@
 import base from "../locales/base.json";
 const X = {
+  admin_connection_missing: ['Administration is unavailable because the website is not connected to its account database. The site owner needs to finish the Supabase connection in Netlify.', 'Админ-панель пока недоступна: сайт не подключён к базе аккаунтов. Владельцу нужно завершить подключение Supabase в Netlify.', 'Админ-панель азырынча жеткиликсиз: сайт аккаунттар базасына туташкан эмес. Сайттын ээси Netlify аркылуу Supabase туташуусун бүтүрүшү керек.'],
   admin_access_title: ['Administrator access required', 'Нужны права администратора', 'Администратор укугу керек'],
   admin_access_description: ['You are signed in, but your account does not have the administrator role. Access must be granted in Supabase by the site owner. If your role was just updated, retry.', 'Вы вошли, но у аккаунта нет роли администратора. Владелец сайта должен назначить её в Supabase. Если роль уже обновлена, нажмите «Повторить».', 'Сиз кирдиңиз, бирок аккаунтуңузда администратор укугу жок. Сайттын ээси аны Supabase аркылуу бериши керек. Укук жаңы берилсе, кайра текшериңиз.'],
   unavailable_product: ['Product unavailable', 'Товар недоступен', 'Товар жеткиликсиз'],

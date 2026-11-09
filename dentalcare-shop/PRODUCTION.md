@@ -148,3 +148,7 @@ location / {
 ## Netlify — dentalcare-shop.netlify.app
 
 Для Netlify добавлены корневой `netlify.toml` и `netlify/functions/api.mjs`. Простая загрузка `dist` не запускает API. Точные настройки, публикация текущих изменений, серверные переменные и честные границы живой проверки описаны в [NETLIFY.md](NETLIFY.md).
+
+## Восстановление конфигурации авторизации
+
+Поддерживаются публичные ключи legacy anon JWT и `sb_publishable_*`. Дополнительное имя build-переменной: `VITE_SUPABASE_PUBLISHABLE_KEY`. При отсутствии build-пары браузер до инициализации состояния получает публичную пару из `/api/public-config`; для неё задайте runtime `SUPABASE_URL` и `SUPABASE_ANON_KEY` или `SUPABASE_PUBLISHABLE_KEY`. Серверный `SUPABASE_SERVICE_ROLE_KEY` по-прежнему нужен для доверенного API заказов и никогда не публикуется этим endpoint. `check:services` учитывает публичные aliases, а health отдельно сообщает флаг `authentication`. Успех получения настроек не доказывает существование schema, аккаунта или admin-роли.

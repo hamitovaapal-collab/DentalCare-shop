@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { publicSettingsFromEnv } from '../src/lib/public-config.js';
 import { supabaseSettings } from '../src/lib/config.js';
 // Read-only diagnostics. Never registers users, changes stock or sends messages.
 const report={supabase:{},telegram:{},email:{}};
@@ -6,7 +7,7 @@ const missing=names=>names.filter(name=>!process.env[name]?.trim());
 const client=(url,key)=>createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:(input,options)=>fetch(input,{...options,signal:AbortSignal.timeout(10000)})}});
 let blocked=false;
 for(const [label,urlName,keyName] of [['public','VITE_SUPABASE_URL','VITE_SUPABASE_ANON_KEY'],['server','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY']]){
- const absent=missing([urlName,keyName]);const config=supabaseSettings(process.env[urlName],process.env[keyName]);
+ const config=label==='public'?publicSettingsFromEnv(process.env):supabaseSettings(process.env[urlName],process.env[keyName]);const absent=label==='public'&&config?[]:missing([urlName,keyName]);
  if(absent.length||!config){report.supabase[label]={status:absent.length?'missing':'invalid',missing:absent};blocked=true;continue;}
  try{const c=client(config.url,config.key);const targets=label==='public'?[['products','id']]:[['products','id,price,stock,active'],['profiles','id,role'],['orders','id,total,status,stock_reserved,request_id'],['telegram_updates','update_id'],['bookings','id,date,time'],['reviews','id,rating']];report.supabase[label]={status:'checked',tables:await Promise.all(targets.map(async([table,columns])=>{const {error,status}=await c.from(table).select(columns).limit(0);if(error)blocked=true;return {table,status:error?'failed':'accessible',http:status,code:error?.code||undefined};}))};}catch{report.supabase[label]={status:'connection_failed'};blocked=true;}
 }

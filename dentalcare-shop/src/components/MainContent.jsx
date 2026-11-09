@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'; import Skeleton from './Skeleton';
 function Guard({ children, admin }) {
     const { user, ready, profileReady, profile, loadProfile, isAdmin, t } = useApp();
     const location = useLocation();
-    if (!supabase) return <section className="sec auth-wrap"><div className="wrap"><EmptyState icon="user" title={t(admin ? 'adm' : 'mine')} description={t('auth_unavailable')}><Link className="btn" to="/shop">{t('shop')}</Link><Link className="btn ghost-d" to="/contact">{t('contact')}</Link></EmptyState></div></section>;
+    if (!supabase) return <section className="sec auth-wrap"><div className="wrap"><EmptyState icon="user" title={t(admin ? 'adm' : 'mine')} description={t(admin ? 'admin_connection_missing' : 'auth_unavailable')}><Link className="btn" to="/shop">{t('shop')}</Link><Link className="btn ghost-d" to="/contact">{t('contact')}</Link></EmptyState></div></section>;
     if (!ready || (user && !profileReady)) return <div className="wrap" style={{ paddingTop: 140 }}><Skeleton h={240} /></div>;
     if (!user) return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
     if (!profile) return <section className="sec auth-wrap"><div className="wrap" role="alert">{t('data_error')} <button className="btn" onClick={loadProfile}>{t('retry')}</button></div></section>;

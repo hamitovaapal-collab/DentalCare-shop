@@ -51,3 +51,7 @@ Select the **existing** DentalCare project when linking; do not create a replace
 - `git diff --check` passed.
 
 No external messages, customer data changes or public deployment were performed.
+
+## Public runtime authentication settings
+
+The browser can now obtain safe public settings from `/api/public-config` if Vite build-time settings were omitted. Set `SUPABASE_URL` with `SUPABASE_ANON_KEY` or `SUPABASE_PUBLISHABLE_KEY` in the Functions environment, or use the existing public VITE variable names. The endpoint never uses a service-role key; absent settings return `{configured:false}`. Actual project/schema/account setup remains necessary. The frontend build refuses private keys in public slots before writing assets.

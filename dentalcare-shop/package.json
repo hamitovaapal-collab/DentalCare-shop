@@ -21,7 +21,8 @@
     "telegram:setup": "node --use-env-proxy --env-file-if-exists=.env scripts/setup-telegram.js webhook",
     "telegram:test": "node --use-env-proxy --env-file-if-exists=.env scripts/setup-telegram.js test",
     "test:telegram": "node tests/telegram.test.js",
-    "test:netlify": "node tests/netlify.test.js"
+    "test:netlify": "node tests/netlify.test.js",
+    "test:public-config": "node tests/public-config.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
