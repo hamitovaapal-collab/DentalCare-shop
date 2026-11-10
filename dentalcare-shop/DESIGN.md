@@ -60,3 +60,7 @@ Continuous motion uses transform only; scroll reveals and counters remain. Page 
 ## Admin entry and configuration bootstrap
 
 Admin is a public navigation entry in the desktop header and a labeled mobile header shortcut, not a footer link. Its visibility does not grant any privileges. Auth and RLS still protect data. `initializeSupabase()` finishes before AppProvider mounts: use safe build variables or bounded same-origin public runtime configuration, otherwise preserve the storefront. No secret/server credential may enter the browser or static bundle.
+
+## Current visual direction — 10 November 2026 (supersedes the 9 November restoration)
+
+The owner corrected the earlier request: keep the **modern green storefront**, not the old teal clinic hero. The current Home has the rounded pale green hero panel, shop-first copy, one original photograph and category shortcuts, with gentle floating photo/note animation. Keep scroll reveals and counter animations. Do not restore the legacy collage/teal palette when asked to preserve motion. Motion tests in `original-design.spec.js` now protect this current modern identity despite the historical filename. Header admin access, runtime bootstrap, phone validation and other functional fixes stay intact.

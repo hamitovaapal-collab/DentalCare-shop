@@ -14,14 +14,41 @@ export function AppProvider({ children }) {
     const [profileReady, setProfileReady] = useState(false); const [dataError, setDataError] = useState(false); const [productsReady, setProductsReady] = useState(!supabase);
     const [user, setUser] = useState(null); const [profile, setProfile] = useState(null); const [ready, setReady] = useState(!supabase);
     const [products, setProducts] = useState(supabase ? [] : PRODUCTS); const [reviews, setReviews] = useState(supabase ? [] : sample); const [toast, setToast] = useState(null);
-    useEffect(() => { document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0b1b1f' : '#ffffff'); persist('theme', theme) }, [theme]);
+    useEffect(() => { document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#101e1c' : '#f7f9f7'); persist('theme', theme) }, [theme]);
     useEffect(() => { document.documentElement.lang = lang; persist('lang', lang) }, [lang]);
     useEffect(() => persist('cart', JSON.stringify(cart)), [cart]); useEffect(() => persist('favs', JSON.stringify(favs)), [favs]);
     useEffect(() => {
-        if (!supabase) return; supabase.auth.getSession().then(({ data, error }) => { if (error) setDataError(true); setUser(data?.session?.user ?? null); }).catch(() => setDataError(true)).finally(() => setReady(true));
-        const { data: s } = supabase.auth.onAuthStateChange((_e, ses) => setUser(ses?.user ?? null)); return () => s.subscription.unsubscribe()
+        if (!supabase) return;
+        let active = true, authEventReceived = false;
+        const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!active) return;
+            authEventReceived = true;
+            setUser(session?.user ?? null);
+            setReady(true);
+        });
+        supabase.auth.getSession().then(({ data, error }) => {
+            // A sign-in/sign-out event is newer than the initial session snapshot.
+            if (!active || authEventReceived) return;
+            if (error) setDataError(true);
+            setUser(data?.session?.user ?? null);
+        }).catch(() => { if (active && !authEventReceived) setDataError(true); })
+            .finally(() => { if (active) setReady(true); });
+        return () => { active = false; subscription.subscription.unsubscribe(); };
     }, []);
-    const loadProfile = useCallback(async () => { const request = ++profileRequest.current; setProfile(null); setProfileReady(false); try { if (!supabase || !user) return; const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(); if (error) throw error; if (request === profileRequest.current) setProfile(data); } catch { setDataError(true); } finally { if (request === profileRequest.current) { setProfileReady(true); setProfileLoadedFor(user?.id || null); } } }, [user]);
+    const userId = user?.id || null;
+    const loadProfile = useCallback(async () => {
+        const request = ++profileRequest.current;
+        setProfile(null); setProfileReady(false);
+        try {
+            if (!supabase || !userId) return;
+            const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+            if (error) throw error;
+            if (request === profileRequest.current) setProfile(data);
+        } catch { if (request === profileRequest.current) setDataError(true); }
+        finally {
+            if (request === profileRequest.current) { setProfileReady(true); setProfileLoadedFor(userId); }
+        }
+    }, [userId]);
     useEffect(() => { loadProfile() }, [loadProfile]);
     const loadProducts = useCallback(async () => { if (!supabase) return; try { const { data, error } = await supabase.from('products').select('*').order('created_at'); if (error) throw error; setProducts(data || []); } catch { setDataError(true); } finally { setProductsReady(true); } }, []);
     const loadReviews = useCallback(async () => { if (!supabase) return; try { const { data, error } = await supabase.from('reviews').select('*').order('created_at', { ascending: false }).limit(200); if (error) throw error; setReviews(data || []); } catch { setDataError(true); } }, []);
@@ -31,7 +58,19 @@ export function AppProvider({ children }) {
     const limitFor = id => { const p = products.find(x => x.id === id); return p && p.active !== false ? Math.max(0, Math.min(50, Math.floor(Number(p.stock) || 0))) : 0; };
     const addToCart = (id, q = 1) => { const limit = limitFor(id); if (!limit || !Number.isInteger(q) || q < 1) return false; if ((cart.find(item => item.id === id)?.qty || 0) >= limit) { notify(t('max_qty'), 'err'); return false; } setCart(c => c.find(x => x.id === id) ? c.map(x => x.id === id ? { ...x, qty: Math.min(limit, x.qty + q) } : x) : [...c, { id, qty: Math.min(limit, q) }]); notify(t('added')); return true; };
     const setQty = (id, q) => { if (!Number.isInteger(q)) return; const limit = limitFor(id); setCart(c => q < 1 || !limit ? c.filter(x => x.id !== id) : c.map(x => x.id === id ? { ...x, qty: Math.min(limit, q) } : x)); };
-    const removeItem = id => setCart(c => c.filter(x => x.id !== id)); const clearCart = purchasedIds => setCart(current => Array.isArray(purchasedIds) ? current.filter(item => !purchasedIds.includes(item.id)) : []);
+    const removeItem = id => setCart(c => c.filter(x => x.id !== id));
+    const clearCart = purchasedItems => setCart(current => {
+        if (!Array.isArray(purchasedItems)) return [];
+        const quantities = new Map();
+        for (const entry of purchasedItems) {
+            if (typeof entry === 'string') quantities.set(entry, Infinity);
+            else if (entry && typeof entry.id === 'string' && Number.isInteger(entry.qty) && entry.qty > 0) {
+                quantities.set(entry.id, (quantities.get(entry.id) || 0) + entry.qty);
+            }
+        }
+        return current.map(item => quantities.has(item.id) ? { ...item, qty: Math.max(0, item.qty - quantities.get(item.id)) } : item)
+            .filter(item => item.qty > 0);
+    });
     const toggleFav = id => setFavs(f => f.includes(id) ? f.filter(x => x !== id) : [...f, id]);
     const items = useMemo(() => cart.map(c => ({ ...c, qty: Math.min(c.qty, 50, Math.max(0, products.find(p => p.id === c.id)?.stock || 0)), p: products.find(p => p.id === c.id) })).filter(x => x.p && x.p.active !== false && x.qty > 0), [cart, products]);
     const unavailableCart = useMemo(() => productsReady ? cart.map(item => ({ ...item, p: products.find(p => p.id === item.id) })).filter(item => !item.p || item.p.active === false || !(item.p.stock > 0)) : [], [cart, products, productsReady]);

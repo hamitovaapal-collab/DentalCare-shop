@@ -1,12 +1,12 @@
 import { internalRedirect } from '../lib/navigation';
 import EmptyState from '../components/EmptyState';
 import Button from '../components/Button';
-import { useState } from 'react'; import { Link, useNavigate, useSearchParams } from 'react-router-dom'; import { useApp } from '../store'; import { supabase } from '../lib/supabase';
+import { useRef, useState } from 'react'; import { Link, useNavigate, useSearchParams } from 'react-router-dom'; import { useApp } from '../store'; import { supabase } from '../lib/supabase';
 const mail = e => /^\S+@\S+\.\S+$/.test(e);
 function Shell({ title, children }) { const { t } = useApp(); return <section className="sec auth-wrap"><div className="wrap">{!supabase ? <EmptyState icon="user" title={title} description={t('auth_unavailable')}><Link className="btn" to="/shop">{t('shop')}</Link><Link className="btn ghost-d" to="/contact">{t('contact')}</Link></EmptyState> : <div className="auth"><p className="eyebrow">DentalCare</p><h1>{title}</h1>{children}</div>}</div></section> }
 function useForm(init, run) {
-  const { t } = useApp(); const [f, setF] = useState(init); const [err, setErr] = useState(''); const [ok, setOk] = useState(''); const [busy, setBusy] = useState(false);
-  return { f, err, ok, busy, ch: e => setF({ ...f, [e.target.name]: e.target.value }), submit: async e => { e.preventDefault(); setErr(''); setOk(''); setBusy(true); try { await run(f, setErr, setOk) } catch { setErr(t('e_net')) } setBusy(false) } }
+  const { t } = useApp(); const submitting = useRef(false); const [f, setF] = useState(init); const [err, setErr] = useState(''); const [ok, setOk] = useState(''); const [busy, setBusy] = useState(false);
+  return { f, err, ok, busy, ch: e => setF({ ...f, [e.target.name]: e.target.value }), submit: async e => { e.preventDefault(); if (submitting.current) return; submitting.current = true; setErr(''); setOk(''); setBusy(true); try { await run(f, setErr, setOk) } catch { setErr(t('e_net')) } finally { submitting.current = false; setBusy(false); } } }
 }
 const Msg = ({ err, ok }) => <>{err && <p className="bad-msg" role="alert">{err}</p>}{ok && <p className="ok" role="status">{ok}</p>}</>;
 export function Login() {

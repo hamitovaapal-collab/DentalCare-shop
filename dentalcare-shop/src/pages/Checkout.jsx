@@ -1,3 +1,4 @@
+import { validPhone } from '../lib/phone';
 import PageHeading from '../components/PageHeading';
 import LoadingState from '../components/LoadingState';
 import Button from '../components/Button';
@@ -12,18 +13,18 @@ export default function Checkout() {
     if (!productsReady) return <section className="sec page-top"><div className="wrap"><LoadingState/></div></section>;
     if (!items.length && !done) return <Navigate to="/cart" replace />;
     const ch = e => setF({ ...f, [e.target.name]: e.target.value });
-    const valid = () => { const e = {}; if (f.name.trim().length < 2) e.name = t('e_req'); if (!/^\+?[\d\s()-]{7,18}$/.test(f.phone.trim())) e.phone = t('e_ph'); if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) e.email = t('e_email'); if (f.address.trim().length < 5) e.address = t('e_addr'); setEr(e); return !Object.keys(e).length };
+    const valid = () => { const e = {}; if (f.name.trim().length < 2) e.name = t('e_req'); if (!validPhone(f.phone)) e.phone = t('e_ph'); if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) e.email = t('e_email'); if (f.address.trim().length < 5) e.address = t('e_addr'); setEr(e); return !Object.keys(e).length };
     const lines = (its) => its.map(x => `• ${pname(x.p)} × ${x.qty} = ${money(x.p.price * x.qty)}`).join('\n');
-    const wa = (its, tot, id) => waLink(`${t('wa_order')}\n${id ? `#${id.slice(0, 8)}\n` : ''}${lines(its)}\n${t('total')}: ${money(tot)}\n${f.name} · ${f.phone}\n${f.address}${f.note ? `\n${f.note}` : ''}`);
+    const wa = (its, tot, id, form = f) => waLink(`${t('wa_order')}\n${id ? `#${id.slice(0, 8)}\n` : ''}${lines(its)}\n${t('total')}: ${money(tot)}\n${form.name} · ${form.phone}\n${form.address}${form.note ? `\n${form.note}` : ''}`);
     const submit = async e => {
         e.preventDefault(); if (submitting.current || !valid()) return;
         if (!supabase || !user) return notify(t('online_unavailable'), 'err');
         submitting.current = true; setBusy(true);
-        try { const payload = { ...f, items: items.map(x => ({ id: x.id, qty: x.qty })) }; const signature = JSON.stringify(payload); if (attempt.current?.signature !== signature) attempt.current = { signature, id: crypto.randomUUID() }; const r = await post('/api/order', { ...payload, request_id: attempt.current.id }, await getToken()); setDone({ ...r, its: items.map(x => ({ ...x, p: { ...x.p, price: r.items?.find(i => i.id === x.id)?.price ?? x.p.price } })), tot: r.total }); clearCart(items.map(item => item.id)); await loadProducts() }
+        try { const payload = { ...f, items: items.map(x => ({ id: x.id, qty: x.qty })) }; const signature = JSON.stringify(payload); if (attempt.current?.signature !== signature) attempt.current = { signature, id: crypto.randomUUID() }; const r = await post('/api/order', { ...payload, request_id: attempt.current.id }, await getToken()); setDone({ ...r, form: { ...f }, its: items.map(x => ({ ...x, p: { ...x.p, price: r.items?.find(i => i.id === x.id)?.price ?? x.p.price } })), tot: r.total }); clearCart(items.map(item => ({ id: item.id, qty: item.qty }))); await loadProducts() }
         catch (x) { notify(x.message === 'timeout' ? t('e_timeout') : x.message === 'items' ? t('e_stock') : x.message === 'not_configured' ? t('online_unavailable') : x.message === 'net' ? t('e_net') : t('e_ord'), 'err') } finally { setBusy(false); submitting.current = false; }
     };
     if (done) return <section className="sec page-top"><div className="wrap"><div className="auth" style={{ maxWidth: 560 }}><h2>✔ {t('ord_ok')} #{done.id.slice(0, 8)}</h2><p>{t('total')}: <b>{money(done.total)}</b></p><Notify n={done.notify} />
-        <a className="btn" href={wa(done.its, done.tot, done.id)} target="_blank" rel="noopener noreferrer">{t('wa_btn')}</a><Link className="btn sm ghost-d" to="/orders">{t('orders')}</Link><Link className="btn sm ghost-d" to="/shop">{t('cont')}</Link></div></div></section>;
+        <a className="btn" href={wa(done.its, done.tot, done.id, done.form)} target="_blank" rel="noopener noreferrer">{t('wa_btn')}</a><Link className="btn sm ghost-d" to="/orders">{t('orders')}</Link><Link className="btn sm ghost-d" to="/shop">{t('cont')}</Link></div></div></section>;
     const F = (k, l, ty = 'text') => <label><span>{t(l)}</span><input name={k} type={ty} value={f[k]} onChange={ch} className={er[k] ? 'bad' : ''} /><em>{er[k]}</em></label>;
     return <section className="sec page-top"><div className="wrap"><Link to="/cart" className="btn sm ghost-d">← {t('cart')}</Link><PageHeading title={t('checkout')} description={t('checkout_intro')}/>
         <div className="cart-grid">{unavailableCart.length > 0 && <p className="note full">{t('unavailable_cart_notice')}</p>}<form onSubmit={submit} noValidate>{F('name', 'f_name')}{F('phone', 'f_phone', 'tel')}{F('email', 'email', 'email')}{F('address', 'addr_l')}<label className="full"><span>{t('f_msg')}</span><textarea name="note" rows="3" value={f.note} onChange={ch} /></label>

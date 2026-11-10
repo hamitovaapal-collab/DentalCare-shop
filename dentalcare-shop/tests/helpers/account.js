@@ -1,9 +1,9 @@
 import products from '../../src/data/products.json' with {type:'json'};
-export async function mockService(page,{loggedIn=false,admin=false,profileMissing=false,theme='light',stockZero=false,reviews=[]}={}) {
- await page.addInitScript(({products,loggedIn,admin,profileMissing,theme,stockZero,reviews})=>{
+export async function mockService(page,{loggedIn=false,admin=false,profileMissing=false,theme='light',stockZero=false,reviews=[],writeDelay=0}={}) {
+ await page.addInitScript(({products,loggedIn,admin,profileMissing,theme,stockZero,reviews,writeDelay})=>{
   localStorage.setItem('theme',theme);
-  window.fixture={loggedIn,admin,profileMissing,failReset:false,products:products.map(p=>stockZero&&p.id==='p1'?{...p,stock:0}:p),orders:[],bookings:[],reviews,writes:[]};
- },{products,loggedIn,admin,profileMissing,theme,stockZero,reviews});
+  window.fixture={loggedIn,admin,profileMissing,failReset:false,products:products.map(p=>stockZero&&p.id==='p1'?{...p,stock:0}:p),orders:[],bookings:[],reviews,writes:[],writeDelay};
+ },{products,loggedIn,admin,profileMissing,theme,stockZero,reviews,writeDelay});
  await page.route(/\/src\/lib\/supabase\.js(?:\?.*)?$/,route=>route.fulfill({contentType:'application/javascript',body:`
  const f=window.fixture; const user={id:'test-user',email:'test@example.com'}; let listener=()=>{};
  const session=()=>f.loggedIn?{user,access_token:'test-session'}:null;
@@ -16,6 +16,6 @@ export async function mockService(page,{loggedIn=false,admin=false,profileMissin
  },from(table){let op='select',body,single=false;const q={select(){return q},eq(){return q},in(){return q},order(){return q},limit(){return q},maybeSingle(){single=true;return q},
  update(value){op='update';body=value;return q},insert(value){op='insert';body=value;return q},delete(){op='delete';return q},
  then(resolve,reject){if(op!=='select')f.writes.push({table,op,body});let data=table==='profiles'?(f.profileMissing?null:{id:user.id,full_name:'Test Customer',phone:'+996500000000',role:f.admin?'admin':'user',created_at:'2026-01-01'}):f[table]||[];
- if(table==='profiles'&&!single)data=[data];return Promise.resolve({data,error:null}).then(resolve,reject)} };return q;}};
+ if(table==='profiles'&&!single)data=[data];const result={data,error:null};return (op!=='select'&&f.writeDelay?new Promise(done=>setTimeout(()=>done(result),f.writeDelay)):Promise.resolve(result)).then(resolve,reject)} };return q;}};
  `}));
 }

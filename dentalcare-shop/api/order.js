@@ -8,6 +8,7 @@ import {
   validPhone,
   validEmail,
 } from "./_lib.js";
+const currencyText = value => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2, useGrouping: false }).format(value);
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "method" });
   try {
@@ -35,7 +36,7 @@ export default async function handler(req, res) {
     const requested = b.items.map(item => ({ id: item.id, qty: Number(item.qty) }));
     if (requested.some(item => !Number.isInteger(item.qty) || item.qty < 1 || item.qty > 50))
       return res.status(400).json({ error: 'items' });
-    if (b.request_id !== undefined && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(b.request_id)) return res.status(400).json({error:'validation'});
+    if (b.request_id !== undefined && (typeof b.request_id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(b.request_id))) return res.status(400).json({error:'validation'});
     const sb = admin();
     const { data: o, error } = await sb.rpc(b.request_id ? 'place_order_once' : 'place_order', {
       p_user_id: u.id, p_name: name, p_phone: phone, p_email: em,
@@ -53,11 +54,11 @@ export default async function handler(req, res) {
     const items = o.items;
     const total = Number(o.total);
     const lines = items
-      .map((i) => `• ${esc(String(i.name).slice(0, 40))} × ${i.qty} = ${i.price * i.qty} KGS`)
+      .map((i) => `• ${esc(String(i.name).slice(0, 40))} × ${i.qty} = ${currencyText(i.price * i.qty)} KGS`)
       .join("\n");
     const orderedAt = new Intl.DateTimeFormat('ru-RU', { timeZone: 'Asia/Bishkek', dateStyle: 'short', timeStyle: 'medium' }).format(new Date(o.created_at || Date.now()));
-    const text = `🛒 <b>New order</b> #${esc(o.id)}\n🕒 ${orderedAt} (Бишкек, UTC+6)\n👤 ${esc(name)}\n📞 ${esc(phone)}\n✉ ${esc(em)}\n${lines}\n💰 <b>Total: ${total} KGS</b>\n📍 ${esc(address)}${note ? `\n📝 ${esc(note)}` : ""}`;
-    const html = `<h2>New order #${o.id.slice(0, 8)}</h2><p>${esc(name)} — ${esc(phone)} — ${esc(em)}</p><pre>${lines}</pre><p><b>Total: ${total} KGS</b></p><p>${esc(address)}</p><p>${orderedAt} (Бишкек, UTC+6)</p><p>${esc(note)}</p>`;
+    const text = `🛒 <b>New order</b> #${esc(o.id)}\n🕒 ${orderedAt} (Бишкек, UTC+6)\n👤 ${esc(name)}\n📞 ${esc(phone)}\n✉ ${esc(em)}\n${lines}\n💰 <b>Total: ${currencyText(total)} KGS</b>\n📍 ${esc(address)}${note ? `\n📝 ${esc(note)}` : ""}`;
+    const html = `<h2>New order #${o.id.slice(0, 8)}</h2><p>${esc(name)} — ${esc(phone)} — ${esc(em)}</p><pre>${lines}</pre><p><b>Total: ${currencyText(total)} KGS</b></p><p>${esc(address)}</p><p>${orderedAt} (Бишкек, UTC+6)</p><p>${esc(note)}</p>`;
     const [tg, mail] = await Promise.all([
       telegram(text),
       email(`New order #${o.id.slice(0, 8)}`, html),

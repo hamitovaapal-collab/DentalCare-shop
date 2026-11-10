@@ -1,3 +1,4 @@
+import { validPhone } from '../lib/phone';
 import PageHeading from '../components/PageHeading';
 import Button from '../components/Button';
 import { useEffect, useState } from 'react'; import { Link, useNavigate } from 'react-router-dom'; import { useApp } from '../store'; import { supabase } from '../lib/supabase';
@@ -5,7 +6,7 @@ export default function Profile() {
     const { t, user, profile, isAdmin, loadProfile, logout, notify } = useApp(); const nav = useNavigate(); const [name, setName] = useState(profile?.full_name || ''); const [phone, setPhone] = useState(profile?.phone || ''); const [err, setErr] = useState(''); const [busy, setBusy] = useState(false);
     useEffect(() => { setName(profile?.full_name || ''); setPhone(profile?.phone || ''); }, [profile]);
     const save = async e => {
-        e.preventDefault(); setErr(''); if (name.trim().length < 2) return setErr(t('e_req')); if (phone && !/^\+?[\d\s()-]{7,18}$/.test(phone)) return setErr(t('e_ph'));
+        e.preventDefault(); setErr(''); if (name.trim().length < 2) return setErr(t('e_req')); if (phone && !validPhone(phone)) return setErr(t('e_ph'));
         setBusy(true);
         try { const { error } = await supabase.from('profiles').update({ full_name: name.trim(), phone: phone.trim() }).eq('id', user.id); if (error) throw error; await loadProfile(); notify(t('saved')); }
         catch { setErr(t('e_srv')); }

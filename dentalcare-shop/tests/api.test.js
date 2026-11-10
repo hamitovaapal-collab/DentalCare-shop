@@ -43,3 +43,15 @@ test('post-login redirects remain within the application',()=>{for(const value o
 import { post } from '../src/lib/api.js';
 test('client requests time out instead of leaving submit buttons pending forever',async t=>{t.mock.timers.enable({apis:['setTimeout']});globalThis.fetch=async(_url,options)=>new Promise((_resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError'))));const pending=assert.rejects(post('/api/order',{}),/timeout/);t.mock.timers.tick(30001);await pending;});
 test('client distinguishes validation failures, unavailable responses and network errors',async()=>{globalThis.fetch=async()=>new Response('{"error":"validation"}',{status:400});await assert.rejects(post('/api/booking',{}),/validation/);globalThis.fetch=async()=>new Response('<html>missing</html>',{status:404});await assert.rejects(post('/api/order',{}),/net/);globalThis.fetch=async()=>{throw new TypeError('network')};await assert.rejects(post('/api/order',{}),/net/);});
+test('booking and checkout reject formatted strings without enough phone digits before writing',async()=>{
+ for(const phone of ['-------','()()()()','+12 (34)-56','+1234567890123456']){
+  let calls=backend();assert.equal((await call(booking,{...validBooking,phone})).status,400);assert.equal(calls.filter(c=>c.options.method==='POST').length,0);
+  calls=backend();assert.equal((await call(order,{...validOrder,phone},'Bearer test')).status,400);assert.equal(calls.filter(c=>c.url.includes('/rpc/')).length,0);
+ }
+});
+test('both forms accept the original Kyrgyz contact format',async()=>{
+ backend();assert.equal((await call(booking,{...validBooking,phone:'+996 (502) 820-642'})).status,200);
+ backend();assert.equal((await call(order,{...validOrder,phone:'+996 (502) 820-642'},'Bearer test')).status,200);
+});
+
+test('request id must be a string UUID, never a coercible array or object',async()=>{const id='10000000-0000-0000-0000-000000000001';for(const request_id of [[id],{value:id},null,123,'not-a-uuid']){const calls=backend();assert.equal((await call(order,{...validOrder,request_id},'Bearer test')).status,400);assert.equal(calls.filter(c=>c.url.includes('/rpc/')).length,0);}});

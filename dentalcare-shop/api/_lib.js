@@ -19,7 +19,7 @@ export const esc = (s) =>
     /[&<>]/g,
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c],
   );
-export const validPhone = (p) => /^\+?[\d\s()-]{7,18}$/.test(p);
+export { validPhone } from '../src/lib/phone.js';
 export const validEmail = (e) => /^\S+@\S+\.\S+$/.test(e);
 export { telegram } from './_telegram.js';
 export async function email(subject, html) {
