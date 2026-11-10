@@ -19,3 +19,14 @@ test('Russian Contacts chatbot shortcut returns contacts and opens Contact page'
 test('deleting the product being edited clears its draft and the next save creates a new product',async({page})=>{
  await openProductEditor(page);await page.getByRole('button',{name:'Edit',exact:true}).first().click();await expect(page.locator('[name=name_en]')).toHaveValue('Home Whitening Kit');await page.getByRole('button',{name:'Delete',exact:true}).first().click();await page.getByRole('dialog').getByRole('button',{name:'Delete',exact:true}).click();await expect(page.getByRole('button',{name:'Save product',exact:true})).toBeDisabled();await expect(page.locator('[name=name_en]')).toBeDisabled();await expect(page.getByRole('button',{name:'Back',exact:true})).toBeDisabled();await expect(page.locator('[name=name_en]')).toHaveValue('');await expect(page.getByRole('button',{name:'Save product',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'Back',exact:true})).toHaveCount(0);await page.locator('[name=name_en]').fill('Replacement product');await page.locator('[name=price]').fill('123');await page.getByRole('button',{name:'Save product',exact:true}).click();await expect(page.getByRole('button',{name:'Save product',exact:true})).toBeEnabled();expect(await page.evaluate(()=>window.fixture.writes.filter(x=>x.table==='products').map(x=>x.op))).toEqual(['delete','insert']);
 });
+
+test('chat access does not cover a product favorite on narrow screens',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});
+ for(const width of [320,390])for(const [label,theme] of [['Day','light'],['Night','dark']]){
+  await page.setViewportSize({width,height:900});await page.goto('/shop');await page.getByRole('button',{name:label,exact:true}).click();await expect(page.locator('html')).toHaveAttribute('data-theme',theme);
+  const favorite=page.locator('.pc .heart').nth(1);await favorite.scrollIntoViewIfNeeded();
+  await expect.poll(()=>favorite.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})).toBe(true);
+  const before=await favorite.getAttribute('aria-pressed');await favorite.click();await expect(favorite).toHaveAttribute('aria-pressed',before==='true'?'false':'true');
+  await page.locator('.fab').click();await expect(page.locator('.bot')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('.bot')).toHaveCount(0);await expect(page.locator('.fab')).toBeFocused();
+ }
+});

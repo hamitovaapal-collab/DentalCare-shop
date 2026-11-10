@@ -9,7 +9,7 @@ const I = [
   { k: ['whatsapp', 'telegram', 'phone', 'contact', 'связ', 'контакт', 'телефон', 'номер', 'байланыш'], l: '/contact', a: ["You can reach us on Telegram (+996 502 820 642) or WhatsApp. Details are on the Contact page.", "Пишите в Telegram (+996 502 820 642) или WhatsApp. Подробности — на странице «Контакты».", "Telegram (+996 502 820 642) же WhatsApp аркылуу жазыңыз. Толугу «Байланыш» барагында."] },
   { k: ['service', 'implant', 'whiten', 'braces', 'услуг', 'имплант', 'отбел', 'брекет', 'кызмат'], l: '/', a: ["We offer general and cosmetic dentistry, implants, whitening, orthodontics and preventive care. Open a service card on the Home page for details.", "Мы предлагаем терапию, эстетику, имплантацию, отбеливание, ортодонтию и профилактику. Подробности — в карточках услуг на главной.", "Жалпы жана эстетикалык стоматология, имплант, актоо, ортодонтия жана профилактика. Кененирээк — башкы беттеги карточкаларда."] },
   { k: ['product', 'shop', 'toothbrush', 'товар', 'магазин', 'щётк', 'щетк', 'дүкөн', 'щётка'], l: '/shop', a: ["Our shop has toothbrushes, whitening kits, irrigators and more. Use search and filters to find what you need.", "В магазине щётки, наборы для отбеливания, ирригаторы и другое. Используйте поиск и фильтры.", "Дүкөндө щёткалар, актоо топтомдору, ирригаторлор бар. Издөө жана чыпкаларды колдонуңуз."] }];
-export default function Chatbot() {
+export default function Chatbot({ onOpen }) {
   const { t, lang } = useApp(); const nav = useNavigate(); const [open, setOpen] = useState(false); const [msgs, setMsgs] = useState([]); const [v, setV] = useState(''); const [busy, setBusy] = useState(false); const end = useRef(); const launcher = useRef(null); const panel = useRef(null); const li = ['en', 'ru', 'ky'].indexOf(lang);
   const closeChat = () => { setOpen(false); launcher.current?.focus(); };
   useEffect(() => {
@@ -34,5 +34,5 @@ export default function Chatbot() {
       {busy && <div className="bm typing"><i /><i /><i /></div>}<div ref={end} /></div>
     <div className="chips">{chips.map(([k, q]) => <button key={k} disabled={busy} onClick={() => ask(t(k))}>{t(k)}</button>)}</div>
     <div className="bot-f"><input value={v} onChange={e => setV(e.target.value)} onKeyDown={e => e.key === 'Enter' && ask(v)} placeholder={t('bot_ph')} aria-label={t('bot_ph')} /><button className="btn sm" disabled={busy || !v.trim()} aria-label={t('submit')} onClick={() => ask(v)}><Icon n="arrow" s={18}/></button></div></div>}
-    <button ref={launcher} className="fab" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={t('bot_open')}><Icon n={open ? 'close' : 'chat'} s={25}/></button></>
+    <button ref={launcher} className="fab" onClick={() => { if (!open) onOpen?.(); setOpen(value => !value); }} aria-expanded={open} aria-label={t('bot_open')}><Icon n={open ? 'close' : 'chat'} s={25}/></button></>
 }

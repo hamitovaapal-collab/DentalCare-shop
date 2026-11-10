@@ -14,7 +14,7 @@ export function AppProvider({ children }) {
     const [profileReady, setProfileReady] = useState(false); const [dataError, setDataError] = useState(false); const [productsReady, setProductsReady] = useState(!supabase);
     const [user, setUser] = useState(null); const [profile, setProfile] = useState(null); const [ready, setReady] = useState(!supabase);
     const [products, setProducts] = useState(supabase ? [] : PRODUCTS); const [reviews, setReviews] = useState(supabase ? [] : sample); const [toast, setToast] = useState(null);
-    useEffect(() => { document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0c1725' : '#f4f7fb'); persist('theme', theme) }, [theme]);
+    useEffect(() => { document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#111725' : '#faf9f6'); persist('theme', theme) }, [theme]);
     useEffect(() => { document.documentElement.lang = lang; persist('lang', lang) }, [lang]);
     useEffect(() => persist('cart', JSON.stringify(cart)), [cart]); useEffect(() => persist('favs', JSON.stringify(favs)), [favs]);
     useEffect(() => {

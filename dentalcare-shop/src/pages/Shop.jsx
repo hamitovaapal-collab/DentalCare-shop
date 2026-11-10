@@ -21,11 +21,19 @@ export default function Shop() {
     }, [products, q, cat, sort]);
     return <section className="sec page-top"><div className="wrap">
         <PageHeading title={t('shop_t')} description={t('collection_intro')}/>
-        <div className="shop-bar"><input type="search" value={q} onChange={e => update('q', e.target.value)} placeholder={t('search')} aria-label={t('search')}/>
-            <div className="chips fl">{categories.map(c => <button type="button" key={c} aria-pressed={cat === c} className={cat === c ? 'on' : ''} onClick={() => update('category', c)}>{c === 'all' ? t('all') : t('c_' + c)}</button>)}</div>
-            <select value={sort} onChange={e => update('sort', e.target.value)} aria-label={t('sort')}><option value="new">{t('s_new')}</option><option value="asc">{t('s_asc')}</option><option value="desc">{t('s_desc')}</option></select>
+        <div className="catalog-layout">
+            <aside className="shop-bar" aria-label={t('search')}>
+                <input type="search" value={q} onChange={e => update('q', e.target.value)} placeholder={t('search')} aria-label={t('search')}/>
+                <div className="chips fl">{categories.map(c => <button type="button" key={c} aria-pressed={cat === c} className={cat === c ? 'on' : ''} onClick={() => update('category', c)}>{c === 'all' ? t('all') : t('c_' + c)}</button>)}</div>
+            </aside>
+            <div className="catalog-results">
+                <div className="catalog-meta">
+                    <span role="status">{t('catalog_count', { count: list.length })}</span>
+                    {(q || cat !== 'all' || sort !== 'new') && <button type="button" onClick={() => setParams({})}>{t('reset_filters')}</button>}
+                    <label className="catalog-sort"><span>{t('sort')}</span><select value={sort} onChange={e => update('sort', e.target.value)} aria-label={t('sort')}><option value="new">{t('s_new')}</option><option value="asc">{t('s_asc')}</option><option value="desc">{t('s_desc')}</option></select></label>
+                </div>
+                {!productsReady ? <LoadingState cards/> : dataError && !products.length ? <EmptyState icon="search" title={t('data_error')}><Button onClick={retryData}>{t('retry')}</Button></EmptyState> : list.length ? <div className="grid4">{list.map((p, i) => <ProductCard key={p.id} p={p} i={i}/>)}</div> : <EmptyState icon="search" title={t('none')} description={t('empty_search')}><Button variant="secondary" onClick={() => setParams({})}>{t('reset_filters')}</Button></EmptyState>}
+            </div>
         </div>
-        <div className="catalog-meta"><span role="status">{t('catalog_count', { count: list.length })}</span>{(q || cat !== 'all' || sort !== 'new') && <button type="button" onClick={() => setParams({})}>{t('reset_filters')}</button>}</div>
-        {!productsReady ? <LoadingState cards/> : dataError && !products.length ? <EmptyState icon="search" title={t('data_error')}><Button onClick={retryData}>{t('retry')}</Button></EmptyState> : list.length ? <div className="grid4">{list.map((p, i) => <ProductCard key={p.id} p={p} i={i}/>)}</div> : <EmptyState icon="search" title={t('none')} description={t('empty_search')}><Button variant="secondary" onClick={() => setParams({})}>{t('reset_filters')}</Button></EmptyState>}
     </div></section>;
 }

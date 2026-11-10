@@ -10,7 +10,7 @@ export default defineConfig(({mode}) => {
         generateBundle() {
             const input = process.env.COMMIT_REF || '';
             const revision = /^[a-f0-9]{40}$/i.test(input) ? input : null;
-            this.emitFile({type: 'asset', fileName: 'build-info.json', source: JSON.stringify({design: 'navy-storefront', revision, builtAt: new Date().toISOString()})});
+            this.emitFile({type: 'asset', fileName: 'build-info.json', source: JSON.stringify({design: 'cobalt-storefront', revision, builtAt: new Date().toISOString()})});
         },
     }],
     server: { proxy: apiProxy },

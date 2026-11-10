@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../store';
 import Icon from './Icon';
 import ThemeSwitch from './ThemeSwitch';
+import Chatbot from './Chatbot';
 export default function Header() {
     const { t, lang, setLang, cartCount, favs, user } = useApp();
     const header = useRef(null);
@@ -41,6 +42,7 @@ export default function Header() {
                     <Link className="ib cart-link" to="/cart" aria-label={t('cart')}><Icon n="cart"/>{cartCount > 0 && <i>{cartCount}</i>}<span>{t('cart')}</span></Link>
                     <Link className="ib admin-shortcut" to="/admin" aria-label={t('adm')}><Icon n="shield" s={18}/><span>{t('adm')}</span></Link>
                 </div>
+                <Chatbot onOpen={() => setOpen(false)}/>
                 <button type="button" className="burger ib" aria-label={t('menu')} aria-controls="menu" aria-expanded={open} onClick={() => setOpen(v => !v)}><Icon n={open ? 'close' : 'menu'} s={23}/></button>
             </div>
             <div className="nav-divider"><div className="wrap nav-bottom">

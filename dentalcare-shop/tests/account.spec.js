@@ -50,13 +50,13 @@ test('booking confirms only a successful API response and displays notification 
 });
 for(const theme of ['light','dark'])for(const width of [390,1440])test(`account, checkout and admin surfaces follow ${theme} at ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:900});await mockService(page,{loggedIn:true,admin:true,theme});
- const surface=theme==='dark'?'rgb(20, 36, 57)':'rgb(255, 255, 255)';
- const input=theme==='dark'?'rgb(12, 23, 37)':'rgb(244, 247, 251)';
+ const surface=theme==='dark'?'rgb(26, 35, 54)':'rgb(255, 255, 255)';
+ const input=theme==='dark'?'rgb(36, 47, 72)':'rgb(237, 241, 251)';
  await page.goto('/admin');await expect(page.locator('.kpis')).toBeVisible();await expect(page.locator('.kpi').first()).toHaveCSS('background-color',surface);
  for(const name of ['My orders','Booking','Users','Reviews','Shop']){await page.locator('main .chips').getByRole('button',{name,exact:true}).click();await expect(page.locator('.tbl')).toHaveCSS('background-color',surface);}
  await expect(page.locator('[name=name_en]')).toHaveCSS('background-color',input);
  await page.goto('/profile');await expect(page.locator('form.auth')).toHaveCSS('background-color',surface);await expect(page.locator('form.auth input').first()).toHaveCSS('background-color',input);
- await page.addInitScript(()=>localStorage.setItem('cart',JSON.stringify([{id:'p1',qty:1}])));await page.goto('/checkout');await expect(page.locator('[name=address]')).toBeVisible();await expect(page.locator('main form')).toHaveCSS('background-color',surface);await expect(page.locator('.sum')).toHaveCSS('background-color',surface);
+ await page.addInitScript(()=>localStorage.setItem('cart',JSON.stringify([{id:'p1',qty:1}])));await page.goto('/checkout');await expect(page.locator('[name=address]')).toBeVisible();await expect(page.locator('main form')).toHaveCSS('background-color',surface);await expect(page.locator('.sum')).toHaveCSS('background-color',theme==='dark'?'rgb(36, 47, 72)':'rgb(237, 241, 251)');
 });
 test('admin cancellation leaves the product intact',async({page})=>{await mockService(page,{loggedIn:true,admin:true});await page.goto('/admin');await page.locator('main .chips').getByRole('button',{name:'Shop',exact:true}).click();await page.getByRole('button',{name:'Delete',exact:true}).first().click();await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).click();expect(await page.evaluate(()=>window.fixture.writes.filter(x=>x.op==='delete'))).toEqual([]);});
 test('reset without a recovery session offers a fresh link instead of submitting a broken request',async({page})=>{await mockService(page);await page.goto('/reset-password');await expect(page.locator('.note')).toContainText('missing or expired');await expect(page.locator('[name=password]')).toHaveCount(0);await page.getByRole('link',{name:'Send reset link',exact:true}).click();await expect(page).toHaveURL(/forgot/);});
