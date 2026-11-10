@@ -8,8 +8,8 @@ for(const width of [320,768,1440])for(const theme of ['light','dark'])test(`all 
  for(const route of routes){
   await page.goto(route);await expect(page.locator('main')).not.toBeEmpty();await expect(page.locator('html')).toHaveAttribute('data-theme',theme);
   const state=await page.evaluate(()=>{const style=getComputedStyle(document.body);const root=getComputedStyle(document.documentElement);return {width:innerWidth,scroll:document.documentElement.scrollWidth,background:style.backgroundColor,color:style.color,colorScheme:root.colorScheme,primary:root.getPropertyValue('--primary').trim(),button:document.querySelector('main .btn:not(.ghost-d):not(.light-b):not(.whatsapp):not(.telegram):not(.ghost)')?getComputedStyle(document.querySelector('main .btn:not(.ghost-d):not(.light-b):not(.whatsapp):not(.telegram):not(.ghost)')).backgroundColor:null};});
-  expect(state.scroll,route).toBeLessThanOrEqual(width);expect(state.colorScheme).toBe(theme);expect(state.background).toBe(theme==='dark'?'rgb(16, 30, 28)':'rgb(247, 249, 247)');expect(state.color).toBe(theme==='dark'?'rgb(237, 245, 239)':'rgb(24, 47, 42)');
-  if(state.button)expect(state.button,route).toBe(theme==='dark'?'rgb(188, 225, 189)':'rgb(27, 97, 80)');
+  expect(state.scroll,route).toBeLessThanOrEqual(width);expect(state.colorScheme).toBe(theme);expect(state.background).toBe(theme==='dark'?'rgb(12, 23, 37)':'rgb(244, 247, 251)');expect(state.color).toBe(theme==='dark'?'rgb(237, 244, 250)':'rgb(18, 45, 66)');
+  if(state.button)expect(state.button,route).toBe(theme==='dark'?'rgb(157, 223, 227)':'rgb(7, 95, 112)');
  }
  expect(errors).toEqual([]);
 });
@@ -21,8 +21,8 @@ for(const width of [320,390,768,1440])test(`Day and Night are idempotent, persis
  }
  await page.goto('/contact');await page.getByRole('button',{name:'Night',exact:true}).click();await page.goto('/booking');await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
  const colors=await page.locator('main form, main input, main select, main textarea').evaluateAll(elements=>elements.map(el=>getComputedStyle(el).backgroundColor));expect(colors.length).toBeGreaterThan(4);expect(colors.every(color=>color!=='rgb(255, 255, 255)')).toBe(true);
- await page.goto('/');await page.locator('button.svc').first().click();await expect(page.locator('.mbox')).toHaveCSS('background-color','rgb(24, 43, 39)');await page.keyboard.press('Escape');
- await page.getByRole('button',{name:'Open chat',exact:true}).click();await expect(page.locator('.bot')).toHaveCSS('background-color','rgb(24, 43, 39)');
+ await page.goto('/');await page.locator('button.svc').first().click();await expect(page.locator('.mbox')).toHaveCSS('background-color','rgb(20, 36, 57)');await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:'Open chat',exact:true}).click();await expect(page.locator('.bot')).toHaveCSS('background-color','rgb(20, 36, 57)');
 });
 test('invalid stored theme falls back to the system preference',async({page})=>{await page.emulateMedia({colorScheme:'dark'});await page.addInitScript(()=>localStorage.setItem('theme','invalid-theme'));await page.goto('/');await expect(page.locator('html')).toHaveAttribute('data-theme','dark');expect(await page.evaluate(()=>localStorage.getItem('theme'))).toBe('dark');});
 test('palette provides readable text and button contrast in both themes',async({page})=>{

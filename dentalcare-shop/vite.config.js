@@ -5,7 +5,14 @@ const apiProxy = { '/api': 'http://localhost:5000' };
 export default defineConfig(({mode}) => {
     assertPublicBuildSettings(loadEnv(mode, process.cwd(), 'VITE_'));
     return {
-    plugins: [react()],
+    plugins: [react(), {
+        name: 'public-build-info', apply: 'build',
+        generateBundle() {
+            const input = process.env.COMMIT_REF || '';
+            const revision = /^[a-f0-9]{40}$/i.test(input) ? input : null;
+            this.emitFile({type: 'asset', fileName: 'build-info.json', source: JSON.stringify({design: 'navy-storefront', revision, builtAt: new Date().toISOString()})});
+        },
+    }],
     server: { proxy: apiProxy },
     preview: { proxy: apiProxy },
     build: { rollupOptions: { output: { manualChunks: {

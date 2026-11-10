@@ -50,8 +50,8 @@ test('booking confirms only a successful API response and displays notification 
 });
 for(const theme of ['light','dark'])for(const width of [390,1440])test(`account, checkout and admin surfaces follow ${theme} at ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:900});await mockService(page,{loggedIn:true,admin:true,theme});
- const surface=theme==='dark'?'rgb(24, 43, 39)':'rgb(255, 255, 255)';
- const input=theme==='dark'?'rgb(16, 30, 28)':'rgb(247, 249, 247)';
+ const surface=theme==='dark'?'rgb(20, 36, 57)':'rgb(255, 255, 255)';
+ const input=theme==='dark'?'rgb(12, 23, 37)':'rgb(244, 247, 251)';
  await page.goto('/admin');await expect(page.locator('.kpis')).toBeVisible();await expect(page.locator('.kpi').first()).toHaveCSS('background-color',surface);
  for(const name of ['My orders','Booking','Users','Reviews','Shop']){await page.locator('main .chips').getByRole('button',{name,exact:true}).click();await expect(page.locator('.tbl')).toHaveCSS('background-color',surface);}
  await expect(page.locator('[name=name_en]')).toHaveCSS('background-color',input);

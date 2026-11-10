@@ -23,3 +23,9 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Public build provenance only; helps identify an old deploy without UI clutter.
+[[headers]]
+  for = "/build-info.json"
+  [headers.values]
+    Cache-Control = "no-store"
