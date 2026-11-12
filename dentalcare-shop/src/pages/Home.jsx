@@ -18,7 +18,20 @@ export default function Home() {
         <section className="store-hero" id="home"><div className="wrap">
             <div className="hero-topline"><span>{t('brand_descriptor')}</span><Link to="/shop">{t('shop')} <Icon n="arrow" s={18}/></Link></div>
             <div className="hero-panel">
-                <div className="hero-media"><img src="/images/hero1.jpg" alt="Dentist caring for a patient" fetchpriority="high"/><div className="hero-note"><Icon n="tooth" s={30}/><div><b>DentalCare</b><span>{t('clinic_note')}</span></div></div></div>
+                <div className="hero-media">
+    <img
+        src="/images/hero1.jpg"
+        alt="Dentist caring for a patient"
+        fetchpriority="high"
+    />
+    <div className="hero-note">
+        <Icon n="tooth" s={30}/>
+        <div>
+            <b>DentalCare</b>
+            <span>{t('clinic_note')}</span>
+        </div>
+    </div>
+</div>
                 <div className="hero-copy"><p className="eyebrow">{t('store_eyebrow')}</p><h1>{titleBreak >= 0 ? <>{heroTitle.slice(0, titleBreak + 1)}{' '}<span>{heroTitle.slice(titleBreak + 1).trim()}</span></> : heroTitle}</h1><p className="lead">{t('store_intro')}</p><div className="cta"><Link to="/shop" className="btn">{t('store_cta')} <Icon n="arrow" s={18}/></Link><button className="btn ghost" onClick={() => jump('services')}>{t('explore')}</button></div><div className="hero-caption"><span><Icon n="tooth" s={17}/> {t('c_care')}</span><span><Icon n="smile" s={17}/> {t('c_whitening')}</span><span><Icon n="heart" s={17}/> {t('c_kids')}</span></div></div>
             </div>
         </div></section>
