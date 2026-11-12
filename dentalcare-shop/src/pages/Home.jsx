@@ -18,13 +18,47 @@ export default function Home() {
         <section className="store-hero" id="home"><div className="wrap">
             <div className="hero-topline"><span>{t('brand_descriptor')}</span><Link to="/shop">{t('shop')} <Icon n="arrow" s={18}/></Link></div>
             <div className="hero-panel">
-                <div className="hero-media">
-    <img
-        src="/images/hero1.jpg"
-        alt="Dentist caring for a patient"
-        fetchpriority="high"
-    />
-    <div className="hero-note">
+               <div
+    className="hero-media"
+    style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gridTemplateRows: 'repeat(2, minmax(0, 1fr)) auto',
+        gap: 12,
+        padding: 8,
+        height: 'clamp(340px, 40vw, 520px)',
+        minHeight: 340
+    }}
+>
+    {['hero1', 'hero2', 'hero3', 'hero4'].map((photo, i) => (
+        <img
+            key={photo}
+            src={`/images/${photo}.jpg`}
+            alt={`DentalCare — фото ${i + 1}`}
+            style={{
+                position: 'relative',
+                inset: 'auto',
+                width: '100%',
+                height: '100%',
+                minWidth: 0,
+                minHeight: 0,
+                aspectRatio: 'auto',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                animationDelay: `${-i * 1.5}s`
+            }}
+        />
+    ))}
+
+    <div
+        className="hero-note"
+        style={{
+            position: 'relative',
+            inset: 'auto',
+            gridColumn: '1 / -1',
+            maxWidth: 'none'
+        }}
+    >
         <Icon n="tooth" s={30}/>
         <div>
             <b>DentalCare</b>
